@@ -17,8 +17,7 @@ var trim =  function( text ) {
 	return (text || "").replace(/^(\s|\u00A0)+|(\s|\u00A0)+$/g, "" );
 };
 var mix = function(a, b){
-	var k;
-	for (k in b) {
+	for (var k in b) {
 		a[k] = b[k];
 	}
 	return a;
@@ -115,9 +114,9 @@ var setConfig = function(c){
 //获取当前活动的正在执行的script标签的路径
 var getInteractiveScriptPath = function (){
 	var doc = document;
-    if(doc.currentScript && 0){
+    if(doc.currentScript){
         return doc.currentScript.src;
-    } else if (doc.attachEvent && 0) {
+    } else if (doc.attachEvent) {
         //ie6-9 得到当前正在执行的script标签
         var scripts = doc.getElementsByTagName('script');
         for (var i = scripts.length - 1; i > -1; i--) {
@@ -127,14 +126,7 @@ var getInteractiveScriptPath = function (){
         }
     } else {
         // chrome and firefox4以前的版本
-        var stack;
-        try {
-            throw new Error();
-        } catch (e) {
-            stack = e.stack;
-        }
-        if (!stack)
-            return "";
+        var stack = (new Error()).stack || "";
         // chrome uses at, Op ff uses @
         var e = stack.indexOf('@') !== -1 ? '@' : ' at ' ;
         while (stack.indexOf(e) !== -1) {
@@ -148,9 +140,8 @@ var getInteractiveScriptPath = function (){
     return "";
 };
 
-var isp = getInteractiveScriptPath();
+var imPath = getInteractiveScriptPath();
 var docPath = (location.href+"").replace(/(\?|#).*$/i,"");
-var imPath =  isp ? isp : "";
 imPath = path.isAP(imPath) ? imPath : path.dirname(docPath)+"/"+imPath;
 var im = "1.0";
 
@@ -383,7 +374,7 @@ function require(deps, callback){
 		});
 	}else{
 		if(type(deps,"function")){
-			deps.apply(null);
+			deps();
 		}
 	}
 }
