@@ -1,0 +1,14 @@
+{
+  "var":{
+     "version":"1.0",
+     "log":""
+  },
+  "process":[{
+      "out":"..\\mods\\im-min.js",
+      "operate":"gcc",
+      "from":[
+         "..\\mods\\im.js"
+      ]
+    }
+  ]
+}

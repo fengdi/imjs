@@ -83,13 +83,13 @@ var path = {
 		}
 		return path.replace(/\/[^\/]+\/?$/g,"");	
 	},
-	basename:function(path, ext){
-		var m;
-		var e = new RegExp((ext||"")+"$");
-		if(m = path.match(/([^\/]+\/?)$/)){
-			return m[0].replace(e,"");
-		}
-	},
+	// basename:function(path, ext){
+	// 	var m;
+	// 	var e = new RegExp((ext||"")+"$");
+	// 	if(m = path.match(/([^\/]+\/?)$/)){
+	// 		return m[0].replace(e,"");
+	// 	}
+	// },
 	//检测是否为带协议的绝对路径 http://a.com
 	isAP:function(path){
 		return !!path.match(/^\w+\:\/\//);
@@ -109,7 +109,7 @@ var config = {
 };
 var setConfig = function(c){
 	return mix(config,c||{});
-}
+};
 
 //获取当前活动的正在执行的script标签的路径
 var getInteractiveScriptPath = function (){
@@ -258,20 +258,20 @@ var moduleManager = {
 		return re;
 	},
 	//获得对应id模块的状态
-	states:function(ids){
-		var mod,that = this,states = [];
-		ids = that.realpaths(ids);
+	// states:function(ids){
+	// 	var mod,that = this,states = [];
+	// 	ids = that.realpaths(ids);
 
-		forEach(ids,function(id){
-			mod = that.data[id];
-			if(!mod){
-				states.push(0);
-			}else{
-				states.push(mod.state);
-			}
-		});
-		return states;
-	},
+	// 	forEach(ids,function(id){
+	// 		mod = that.data[id];
+	// 		if(!mod){
+	// 			states.push(0);
+	// 		}else{
+	// 			states.push(mod.state);
+	// 		}
+	// 	});
+	// 	return states;
+	// },
 	//对应id模块是否都已经加载完成
 	isComplete:function(ids){
 		var that = this;
