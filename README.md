@@ -13,12 +13,15 @@
 define(function(){
 
   //定义模块
+  
   return "this is foo!"
+  
 });
 
 require("foo",function(foo){
 
   //调用模块
+  
   alert(foo);
   
 });
