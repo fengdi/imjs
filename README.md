@@ -9,19 +9,17 @@
  * 异步多线程调用
 
 ### How to use
-文件foo.js
+文件foo.js  
 define(function(){
 
-  //定义模块
-  
+  //定义模块  
   return "this is foo!"
   
 });
 
 require("foo",function(foo){
 
-  //调用模块
-  
+  //调用模块   
   alert(foo);
   
 });
