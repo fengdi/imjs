@@ -10,10 +10,15 @@
 
 ### How to use
 define(function(){
+
   //定义模块
+  
 });
+
 require("foo",function(){
+
   //调用模块
+  
 });
 
 
