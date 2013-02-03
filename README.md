@@ -25,6 +25,6 @@ require("foo",function(foo){
 });
 
 
-For more advanced usage check the [`test.html`](https://github.com/fengdi/).
+For more advanced usage check the [`test.html`](http://fengdi.github.com/imjs/test.html).
 
 This software is released under the MIT license.
