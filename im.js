@@ -22,25 +22,13 @@ var mix = function(a, b){
 	}
 	return a;
 };
-
-/**
- * 类型判断
- * @param {*} obj
- * @param {string= } type
- */
+//类型判断
 var type = function(obj, type) {
 	var ts = {}.toString,
-		_types = {
-		    'undefined' : 'undefined',
-		    'number' : 'number',
-		    'boolean' : 'boolean',
-		    'string' : 'string'
-		},
 		t = obj===null ? 'null' :
-		(_types[typeof obj] || ts.call(obj).slice(8,-1).toLowerCase());
+		(typeof obj=='undefined' && 'undefined' || ts.call(obj).slice(8,-1).toLowerCase());
 	return type ? t===type : t;
 }
-
 var log = function(s,t){
 	t = t || 'log';
 	if('console' in global){
@@ -51,7 +39,7 @@ var log = function(s,t){
 var path = {
 	normalize : function (path) {
 		var protocol = "";
-		path = path.replace(/^\w+\:\/\/\/?/,function(p){
+		path = path.replace(/^\w+:\/\/\/?/,function(p){
 			protocol = p;
 			return "";
 		});
@@ -83,16 +71,9 @@ var path = {
 		}
 		return path.replace(/\/[^\/]+\/?$/g,"");	
 	},
-	// basename:function(path, ext){
-	// 	var m;
-	// 	var e = new RegExp((ext||"")+"$");
-	// 	if(m = path.match(/([^\/]+\/?)$/)){
-	// 		return m[0].replace(e,"");
-	// 	}
-	// },
 	//检测是否为带协议的绝对路径 http://a.com
 	isAP:function(path){
-		return !!path.match(/^\w+\:\/\//);
+		return !!path.match(/^\w+:\/\//);
 	}
 };
 
@@ -110,33 +91,33 @@ var config = {
 var setConfig = function(c){
 	return mix(config,c||{});
 };
+var currentlyAddingScript = null;
 //获取当前活动的正在执行的script标签的路径
 var getInteractiveScriptPath = function (){
 	var doc = document;
     if(doc.currentScript){
         return doc.currentScript.src;
-    } else if (doc.attachEvent) {
-        //ie6-9 得到当前正在执行的script标签
+    }else{
+        //ie6-10 得到当前正在执行的script标签
         var scripts = doc.getElementsByTagName('script');
         for (var i = scripts.length - 1; i > -1; i--) {
             if (scripts[i].readyState === 'interactive') {
                 return scripts[i].src;
             }
         }
-    } else {
         // chrome and firefox4以前的版本
-        var stack = (new Error()).stack || "";
-        // chrome uses at, Op ff uses @
-        var e = stack.indexOf('@') !== -1 ? '@' : ' at ' ;
-        while (stack.indexOf(e) !== -1) {
-            stack = stack.substring(stack.indexOf(e) + e.length);
+        var stack;// = (new Error()).stack;
+        try{
+        	arguments.length(); //强制报错,以便捕获e.stack
+		}catch(e){
+			stack = e.stack || 
+			(global.opera && ((e+"").match(/of linked script \S+/g) || []).join(" "));
         }
-        stack = stack.replace(/\:\d+\:\d+$/mig, "");
-        stack = stack.replace(/\:\d+$/mg, "");
-        stack = trim(stack);
-        return stack;
+        stack = stack.split( /[@ ]/g).pop();//取得最后一行,最后一个空格或@之后的部分
+		return stack.replace(/(:\d+)?:\d+(\s)?$/i, "");//去掉行号与或许存在的出错字符起始位置
     }
-    return "";
+
+    return currentlyAddingScript && currentlyAddingScript.src;
 };
 
 var imPath = getInteractiveScriptPath();
@@ -187,7 +168,7 @@ function Module(file, deps){
 		self.loadScript();
 	},1);
 }
-//定模块的静态方法
+//模块的静态方法
 mix(Module.prototype,{
 	loadScript:function() {
 		//通过script 加载模块
@@ -200,7 +181,7 @@ mix(Module.prototype,{
 		var head = doc.getElementsByTagName('head')[0] || doc.documentElement;
 	    var script = doc.createElement('script');
 	    script.type = 'text/javascript';
-	    script.async = "async";
+	    script.async = true;
 	    script.src = this.file;
 	    script.onerror = onerror;
 	    script.onload = script.onreadystatechange = function () {
@@ -211,7 +192,9 @@ mix(Module.prototype,{
 	            script = undefined;
 	        }
 	    };
+	    currentlyAddingScript = script;
 	    head.insertBefore(script, head.firstChild);
+	    currentlyAddingScript = null;
 	},
 	//将工厂编译后存入模块exports
 	compile:function(){
@@ -251,7 +234,6 @@ var moduleManager = {
 	//获得对应id模块的exports
 	exports:function(ids){
 		var that = this;
-		//ids = that.realpaths(ids);
 		var re = [];
 		forEach(ids,function(id){
 			var m = that.get(id);
@@ -259,26 +241,10 @@ var moduleManager = {
 		});
 		return re;
 	},
-	//获得对应id模块的状态
-	// states:function(ids){
-	// 	var mod,that = this,states = [];
-	// 	ids = that.realpaths(ids);
-
-	// 	forEach(ids,function(id){
-	// 		mod = that.data[id];
-	// 		if(!mod){
-	// 			states.push(0);
-	// 		}else{
-	// 			states.push(mod.state);
-	// 		}
-	// 	});
-	// 	return states;
-	// },
 	//对应id模块是否都已经加载完成
 	isComplete:function(ids){
 		var that = this;
 		var v = 1;
-		//ids = that.realpaths(ids);
 		forEach(ids,function(id){
 			var mod = that.data[id];
 			if(!mod || mod.state< STATUS.COMPILED){
@@ -312,7 +278,6 @@ var moduleManager = {
 			if(!/\.js$/.test(id)){
 				id = id + ".js";
 			}
-
 			ids[i] = id +  "" + config.tag;
 		});
 		//如果没有依赖
@@ -360,7 +325,7 @@ function define(deps, factory){
 		mod.state = STATUS.SAVED;
 		mod.on("save");
 	}else{
-		log("Can't find module:"+ps+"///"+ps.length,"error");
+		log("Can't find module:"+ps,"error");
 	}
 }
 
@@ -383,6 +348,7 @@ global.require = require;
 global.Im = {
 	modules:moduleManager.data,
 	im:im,
+	log:log,
 	config:setConfig
 };
 
