@@ -1,4 +1,4 @@
-// A Module Loader for the Web
+// A tiny javascript module loader for the Web
 // v1.0 | MIT Licensed
 
 (function(global){
@@ -110,7 +110,6 @@ var config = {
 var setConfig = function(c){
 	return mix(config,c||{});
 };
-
 //获取当前活动的正在执行的script标签的路径
 var getInteractiveScriptPath = function (){
 	var doc = document;
@@ -177,13 +176,16 @@ function Module(file, deps){
 		self.state = STATUS.LOADED;
 		//加载依赖
 		self.loadDependencies(function(){
+
 			self.state = STATUS.COMPILING;
 			self.compile.apply(self, slice.call(arguments));
 		});
 
 	});
-
-	self.loadScript();
+	setTimeout(function(){
+		//防止插入标签时阻塞onsave事件
+		self.loadScript();
+	},1);
 }
 //定模块的静态方法
 mix(Module.prototype,{
@@ -304,9 +306,7 @@ var moduleManager = {
 	load:function(ids, callback){
 		var that = this;
 		//为每个id转换成真实uri路径
-
 		ids = that.realpaths(ids);
-
 		//为uri添加一个统一的后缀
 		forEach(ids,function(id,i){
 			if(!/\.js$/.test(id)){
@@ -315,7 +315,6 @@ var moduleManager = {
 
 			ids[i] = id +  "" + config.tag;
 		});
-
 		//如果没有依赖
 		if(ids.length==0){
 			callback();
@@ -350,7 +349,6 @@ function define(deps, factory){
 	var ps = getInteractiveScriptPath();
 	var mod = moduleManager.get(ps);
 	var args = arguments;
-
 	if(mod){
 		if(args.length==1 && type(deps,"function")){
 			factory = deps;
@@ -358,10 +356,11 @@ function define(deps, factory){
 		}else{
 			mod.dependencies = deps||[];
 		}
-
 		mod.factory = factory;
 		mod.state = STATUS.SAVED;
 		mod.on("save");
+	}else{
+		log("Can't find module:"+ps+"///"+ps.length,"error");
 	}
 }
 
