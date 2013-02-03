@@ -1,5 +1,5 @@
 //c module
-define(["d.js"],function(d){
+define("test/d.js",function(d){
 
 
 

@@ -1,0 +1,55 @@
+<!DOCTYPE HTML>
+<html lang="en-US">
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+	<script src="../im.js"></script>
+	
+</head>
+<body>
+
+	<h1>	
+		Im.js 一个微型模块加载器
+	</h1>
+
+	<h3>
+		常用API
+	</h3>
+
+
+	<h4>define(des, fn) -定义一个模块</h4><br>
+
+	在im.js同目录下建一个a.js文件 <br>
+	内容为：<br>
+	define(function(){<br>
+		<br>
+	&nbsp;&nbsp;return "这是a.js返回的数据";<br>
+	<br>
+    });<br>
+    <br>
+    <br>
+    <br>
+
+    <h4>require(id, fn) -调用一个模块</h4><br>
+    我们要调用这个模块时，你可以这样：<br>
+	require("a", function(rA){<br>
+		<br>
+	&nbsp;&nbsp;console.log(rA);//这是a.js返回的数据<br>
+	<br>
+    });<br>
+
+	<script>
+		require("test/a",function(b){
+			console.log(b);
+		});
+	</script>
+	<br>
+	<br>
+	看一下命令行的例子, console.log()输出的结果是调用以下模块完成的 <br>
+	<a href="a.js" target="_blank">a.js</a><br>
+	&nbsp;&nbsp;<a href="b.js" target="_blank">b.js</a><br>
+	&nbsp;&nbsp;&nbsp;<a href="d.js" target="_blank">c.js</a><br>
+	&nbsp;&nbsp;&nbsp;&nbsp;<a href="d.js" target="_blank">d.js</a><br>
+
+</body>
+</html>

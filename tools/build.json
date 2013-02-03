@@ -4,10 +4,10 @@
      "log":""
   },
   "process":[{
-      "out":"..\\mods\\im-min.js",
+      "out":"..\\im-min.js",
       "operate":"gcc",
       "from":[
-         "..\\mods\\im.js"
+         "..\\im.js"
       ]
     }
   ]

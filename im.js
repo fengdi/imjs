@@ -249,7 +249,7 @@ var moduleManager = {
 	//获得对应id模块的exports
 	exports:function(ids){
 		var that = this;
-		ids = that.realpaths(ids);
+		//ids = that.realpaths(ids);
 		var re = [];
 		forEach(ids,function(id){
 			var m = that.get(id);
