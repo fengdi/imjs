@@ -13,6 +13,7 @@ function(arr, fn) {
     fn(arr[i], i, arr);
   }
 };
+var noop = function(){};
 var trim =  function( text ) {
 	return (text || "").replace(/^(\s|\u00A0)+|(\s|\u00A0)+$/g, "" );
 };
@@ -157,11 +158,9 @@ function Module(file, deps){
 		self.state = STATUS.LOADED;
 		//加载依赖
 		self.loadDependencies(function(){
-
 			self.state = STATUS.COMPILING;
 			self.compile.apply(self, slice.call(arguments));
 		});
-
 	});
 	setTimeout(function(){
 		//防止插入标签时阻塞onsave事件
@@ -188,7 +187,7 @@ mix(Module.prototype,{
 	        if (!script.readyState || /loaded|complete/.test(script.readyState)) {
 	        	that.on("load");
 	            script && (script.onerror = script.onload = script.onreadystatechange = null);
-	            head && script.parentNode && head.removeChild(script);
+	            head && script && script.parentNode && head.removeChild(script);
 	            script = undefined;
 	        }
 	    };
@@ -334,7 +333,7 @@ function require(deps, callback){
 	var args = arguments;
 	if(args.length>1){
 		moduleManager.load(deps||[],function(){
-			callback.apply(this, slice.call(arguments));
+			(callback||noop).apply(this, slice.call(arguments));
 		});
 	}else{
 		if(type(deps,"function")){

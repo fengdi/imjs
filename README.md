@@ -4,9 +4,9 @@
 `im.js` is a simple solution to modular javascript development.
 
 ### Features
- * 简单的API
- * URI即Id
- * 异步多线程调用
+ * URI即Id模块不需声明别名
+ * 多依赖支持
+ * 模块并行加载
 
 ### How to use
 文件foo.js  
