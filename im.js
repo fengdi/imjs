@@ -336,8 +336,10 @@ function require(deps, callback){
 			(callback||noop).apply(this, slice.call(arguments));
 		});
 	}else{
-		if(type(deps,"function")){
-			deps();
+		if(type(deps,"array")||type(deps,"string")){
+			moduleManager.load(deps||[],noop);
+		}else if(type(deps,"function")){
+			return deps();
 		}
 	}
 }

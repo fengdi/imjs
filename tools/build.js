@@ -25,7 +25,7 @@ function get_value(obj, path){
 * @return {String} 输出字符串
 */
 function tpl(str, data){
-	return str.replace(/\{#\{(.*)\}#\}/g, function (m, s) {
+	return str.replace(/\{#\{([^}#]*)\}#\}/g, function (m, s) {
 	        return get_value(data, s);
 	});
 }
@@ -77,16 +77,26 @@ var operate = {
 	}
 }
 
+build['var'] = build['var']||{};
+
 build.process.forEach(function(process){
 
 	var files = process.from;
 
+	var prepend = process.prepend || "";//文件头插入内容
+
 	operate[process.operate](files,function(code){
+  		
+    	build['var'].dateTime = (new Date()).toJSON();
+  		
+		console.log(build['var']);
 
+  		code = prepend + code;
+    
 		code = tpl(code, build['var']);
-
+    
 		console.log("write: "+process.out);
-
+		
 		fs.writeFileSync(process.out, code);
 
 	});

@@ -1,11 +1,11 @@
 {
   "var":{
-     "version":"1.0",
-     "log":""
+     "version":"1.0"
   },
   "process":[{
       "out":"..\\im-min.js",
       "operate":"gcc",
+      "prepend":"//im.js v{#{version}#} {#{dateTime}#}\r\n",
       "from":[
          "..\\im.js"
       ]
