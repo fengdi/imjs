@@ -1,10 +1,12 @@
 // A tiny javascript module loader for the Web
-// v1.0 | MIT Licensed
+// v1.1 | MIT Licensed
 
 (function(global){
-var undefined = void 0;
-var slice = [].slice;
-var forEach = [].forEach ?
+var ud = void 0;
+var doc = document;
+var epa = [];
+var slice = epa.slice;
+var forEach = epa.forEach ?
 function(arr, fn) {
   arr.forEach(fn);
 } :
@@ -13,6 +15,19 @@ function(arr, fn) {
     fn(arr[i], i, arr);
   }
 };
+var indexOf = epa.indexOf ? 
+function(arr, v) {
+  return arr.indexOf(v);
+} :
+function(arr, v) {
+  for (var i = 0, len = arr.length; i < len; i++) {
+    if(v===arr[i]){
+    	return i;
+    }
+  }
+  return -1;
+};
+
 var noop = function(){};
 var trim =  function( text ) {
 	return (text || "").replace(/^(\s|\u00A0)+|(\s|\u00A0)+$/g, "" );
@@ -27,9 +42,9 @@ var mix = function(a, b){
 var type = function(obj, type) {
 	var ts = {}.toString,
 		t = obj===null ? 'null' :
-		(typeof obj=='undefined' && 'undefined' || ts.call(obj).slice(8,-1).toLowerCase());
+		(obj===ud && 'undefined' || ts.call(obj).slice(8,-1).toLowerCase());
 	return type ? t===type : t;
-}
+};
 var log = function(s,t){
 	t = t || 'log';
 	if('console' in global){
@@ -44,15 +59,12 @@ var path = {
 			protocol = p;
 			return "";
 		});
-
 		if (path.indexOf(".") === -1) {
 			return protocol + path;
 		}
 		var original = path.split("/");
-		var ret = [], part;
-
-		for (var i = 0; i < original.length; i++) {
-			part = original[i];
+		var ret = [];
+		forEach(original, function(part){
 			if(part!=""){
 				if (part === "..") {
 				  if (ret.length === 0) {
@@ -63,7 +75,7 @@ var path = {
 				  ret.push(part);
 				}
 			}
-		}
+		});
 		return protocol + ret.join("/").replace(":80/", "/");;
 	},
 	dirname:function(path){
@@ -78,13 +90,12 @@ var path = {
 	}
 };
 
-var STATUS = {
-  LOADING: 1,   // loading
-  SAVED: 2,     // saved
-  LOADED: 3,    // ready
-  COMPILING: 4, // compiling
-  COMPILED: 5   // available
-};
+var LOADING = 1,   // loading
+  SAVED = 2,     // saved
+  LOADED = 3,    // ready
+  COMPILING = 4, // compiling
+  COMPILED = 5   // available
+;
 
 var config = {
 	tag:"?t="+(+new Date())
@@ -92,10 +103,10 @@ var config = {
 var setConfig = function(c){
 	return mix(config,c||{});
 };
-var currentlyAddingScript = null;
+var currentlyAddingScript;
 //获取当前活动的正在执行的script标签的路径
 var getInteractiveScriptPath = function (){
-	var doc = document;
+	//var doc = document;
     if(doc.currentScript){
         return doc.currentScript.src;
     }else{
@@ -124,7 +135,6 @@ var getInteractiveScriptPath = function (){
 var imPath = getInteractiveScriptPath();
 var docPath = (location.href+"").replace(/(\?|#).*$/i,"");
 imPath = path.isAP(imPath) ? imPath : path.dirname(docPath)+"/"+imPath;
-var im = "1.0";
 
 //定义模块对象
 function Module(file, deps){
@@ -134,11 +144,11 @@ function Module(file, deps){
 	//模块状态
 	self.state = 1;
 	//对应的依赖模块
-	self.dependencies = deps || [];
+	self.deps = deps || [];
 	//模块的工厂方法
-	self.factory = undefined;
+	self.factory = ud;
 	//模块导出时的数据
-	self.exports = null;
+	self.exports = ud;
 	//模块事件存储
 	self._on = {};
 
@@ -155,61 +165,63 @@ function Module(file, deps){
 	};
 
 	self.on("load", function(){
-		self.state = STATUS.LOADED;
+		if(self.state < LOADED){
+			self.state = LOADED;
+		}
+	});
+	self.on("save", function(){
+		self.state = SAVED;
+		moduleManager.checkCycle(self.file);
 		//加载依赖
-		self.loadDependencies(function(){
-			self.state = STATUS.COMPILING;
+		self.loadDeps(function(){
+			self.state = COMPILING;
 			self.compile.apply(self, slice.call(arguments));
 		});
 	});
-	setTimeout(function(){
-		//防止插入标签时阻塞onsave事件
-		self.loadScript();
-	},1);
 }
 //模块的静态方法
 mix(Module.prototype,{
-	loadScript:function() {
+	load:function() {
 		//通过script 加载模块
-		var doc = document;
+		//var doc = document;
 		var that = this;
 		var onerror = function(e){
-			log("Imjs: load file "+that.file+" error! ","error");
+			//log("Imjs: load file "+that.file+" error! ","error");
 			moduleManager.remove(that.file);
 		};
 		var head = doc.getElementsByTagName('head')[0] || doc.documentElement;
 	    var script = doc.createElement('script');
 	    script.type = 'text/javascript';
 	    script.async = true;
-	    script.src = this.file;
+	    script.src = that.file;
 	    script.onerror = onerror;
 	    script.onload = script.onreadystatechange = function () {
 	        if (!script.readyState || /loaded|complete/.test(script.readyState)) {
 	        	that.on("load");
 	            script && (script.onerror = script.onload = script.onreadystatechange = null);
 	            head && script && script.parentNode && head.removeChild(script);
-	            script = undefined;
+	            script = ud;
 	        }
 	    };
 	    currentlyAddingScript = script;
 	    head.insertBefore(script, head.firstChild);
-	    currentlyAddingScript = null;
+	    currentlyAddingScript = ud;
 	},
 	//将工厂编译后存入模块exports
 	compile:function(){
-		var factory = this.factory;
+		var self = this;
+		var factory = self.factory;
 		if(type(factory, "function")){
-			this.exports = factory.apply(this,slice.call(arguments));
+			self.exports = factory.apply({},slice.call(arguments));
 		}else{
-			this.exports = factory;
+			self.exports = factory;
 		}
-		
-		this.state = STATUS.COMPILED;
-		this.on("compile");
+		self.state = COMPILED;
+		self.on("compile");
 	},
 	//加载依赖模块
-	loadDependencies:function(fn){
-		moduleManager.load(this.dependencies, fn);	
+	loadDeps:function(fn){
+		moduleManager.load(this.deps, fn);	
 	}
 });
 
@@ -230,6 +242,30 @@ var moduleManager = {
 	remove:function(id){
 		delete this.data[id];
 	},
+	//检测模块之间是否循环依赖
+	checkCycle:function(id, stack){
+		var that = this;
+		var deps;
+		var stack = stack || [];
+		var m = that.data[id];
+		if(m){
+			if(!type(m.deps,"array")){
+				deps = [m.deps];
+			}else{
+				deps = m.deps;
+			}
+			deps = that.realpaths(deps);
+			forEach(deps, function(d){
+				if(indexOf(stack,d)==-1){
+					stack.push(d);
+					that.checkCycle(d, stack);
+				}else{
+					stack.push(stack[0]);
+					log("Circular dependencies:\r\n"+stack.join(" >>\r\n"),"error")
+				}
+			});
+		}
+	},
 	//获得对应id模块的exports
 	exports:function(ids){
 		var that = this;
@@ -241,12 +277,12 @@ var moduleManager = {
 		return re;
 	},
 	//对应id模块是否都已经加载完成
-	isComplete:function(ids){
+	isOk:function(ids){
 		var that = this;
 		var v = 1;
 		forEach(ids,function(id){
 			var mod = that.data[id];
-			if(!mod || mod.state< STATUS.COMPILED){
+			if(!mod || mod.state< COMPILED){
 				v = 0;
 			}
 		});
@@ -263,6 +299,11 @@ var moduleManager = {
 			if(!path.isAP(id)){
 				id = path.normalize(path.dirname(imPath)+"/"+id);
 			}
+			//为uri添加一个统一的后缀
+			if(!/\.js$/.test(id)){
+				id = id + ".js";
+			}
+			id = id + (config.tag||"");
 			nids.push(id);
 		});
 		return nids;
@@ -270,15 +311,9 @@ var moduleManager = {
 	//加载ids对应的模块
 	load:function(ids, callback){
 		var that = this;
+		var f = false;
 		//为每个id转换成真实uri路径
 		ids = that.realpaths(ids);
-		//为uri添加一个统一的后缀
-		forEach(ids,function(id,i){
-			if(!/\.js$/.test(id)){
-				id = id + ".js";
-			}
-			ids[i] = id +  "" + config.tag;
-		});
 		//如果没有依赖
 		if(ids.length==0){
 			callback();
@@ -287,20 +322,25 @@ var moduleManager = {
 				var m = that.get(id);
 				if(!m){
 					m = new Module(id);
+					setTimeout(function(){
+						//防止插入标签时阻塞onsave事件
+						m.load();
+					},1);
 					that.set(id, m);
 				}
 				//如果模块状态进行中，绑定事件
 				if(m.state<5){
 					m.on("compile", function(){
 						//判断所有模块是否完成
-						if(that.isComplete(ids)){
-							callback.apply(null, that.exports(ids));
+						if(that.isOk(ids)){
+							callback.apply(global, that.exports(ids));
 						}
 					});
 				}else{
 					//立即判断所有模块是否完成
-					if(that.isComplete(ids)){
-						callback.apply(null, that.exports(ids));
+					if(that.isOk(ids) && !f){
+						f = true;
+						callback.apply(global, that.exports(ids));
 					}
 				}
 			});
@@ -310,22 +350,44 @@ var moduleManager = {
 
 //API 定义一个模块
 function define(deps, factory){
-	var ps = getInteractiveScriptPath();
-	var mod = moduleManager.get(ps);
-	var args = arguments;
+	var args = arguments
+	,i = getInteractiveScriptPath()
+	,d = []
+	,f = noop;
+
+	if(args.length==1){
+		f = deps;
+	}else{
+		d = deps;
+		f = factory;
+	}
+
+	var mod = moduleManager.get(i);
 	if(mod){
-		if(args.length==1 && type(deps,"function")){
-			factory = deps;
-			mod.dependencies = [];
-		}else{
-			mod.dependencies = deps||[];
-		}
-		mod.factory = factory;
-		mod.state = STATUS.SAVED;
+		mod.deps = d;
+		mod.factory = f;
 		mod.on("save");
 	}else{
-		log("Can't find module:"+ps,"error");
+		log("Can't find module:"+i,"error");
 	}
+}
+//API 定义模块包
+//[{uri,deps,factory},]
+function defines(list){
+	var modules = [];
+	forEach(list,function(d){
+		var id = moduleManager.realpaths(d.uri)[0];
+		var m = new Module(id);
+		moduleManager.set(id,m);
+		m.deps = d.deps||[];
+		m.factory = d.factory;
+		modules.push(m);
+	});
+	forEach(modules,function(m){
+		if(m.state < SAVED){
+			m.on("save");
+		}
+	});
 }
 
 //API 获取一个模块
@@ -344,13 +406,16 @@ function require(deps, callback){
 	}
 }
 
-global.define = define;
-global.require = require;
-global.Im = {
-	modules:moduleManager.data,
-	im:im,
-	log:log,
-	config:setConfig
-};
+mix(global,{
+	 define:define
+	,require:require
+	,defines:defines
+	,Im:{
+		 modules:moduleManager.data
+		,im:"1.1"
+		,log:log
+		,config:setConfig
+	}
+});
 
 })(this);

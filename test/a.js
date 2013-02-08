@@ -1,7 +1,7 @@
+//这是 a
+define(["test/b.js", "modules/sizzle"], function(c, $){
+	//模块依赖b模块
+	var h4 = $("h4")[0];
 
-//test a module
-define("test/b",function(b){
-  //模块依赖b模块
-	
-	return "a "+ b;
+	return h4.innerHTML+" a "+c;
 });

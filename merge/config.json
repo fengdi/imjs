@@ -1,0 +1,10 @@
+{
+  "impath":"..\\im.js",
+  "modules":[
+    "..\\test\\d.js",
+    "..\\test\\c.js",
+    "..\\test\\b.js",
+    "..\\test\\a.js"
+  ],
+  "out":"..\\test\\merge.js"
+}

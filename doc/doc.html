@@ -1,0 +1,232 @@
+<!DOCTYPE HTML>
+<html lang="en-US">
+<head>
+	<meta charset="UTF-8">
+	<title>Im.js模块加载器</title>
+	<style type="text/css">
+		*{
+			margin: 0;
+			position: 0;
+		}
+		.wrapper{
+			width: 940px;
+			padding:10px;
+			margin: 0 auto;
+			position: relative;
+			background-color: #fafafa;
+			font-size: 14px;
+			line-height: 1.6em;
+		}
+		h1{
+			text-align: center;
+			line-height: 30px;
+			padding: 5px;
+			margin: 20px 0;
+		}
+		h3{
+			border-bottom: 1px solid #ccc;
+			margin: 15px 0;
+		}
+		.codewrapper{
+			position: relative;
+		}
+		code,
+		.code,
+		.inline-code{
+			border: 1px solid #ddd;
+			font-family: "Lucida Console",monospace;
+			font-size: 12px;
+			background-color: #eee;
+		}
+		code,
+		.code{
+			display: block;
+			padding: 5px;
+		}
+		code{
+			margin: 5px 0;
+		}
+		code .warn,
+		.code .warn{
+			color: #d00;
+		}
+		.inline-code{
+			display: inline;
+			padding:0 4px;
+			line-height: 1.5;
+		}
+		.content{
+			padding-bottom: 12px;
+		}
+	</style>
+</head>
+<body>
+	<div class="wrapper">
+	<h1>	
+		Im.js 一个微型模块加载器
+	</h1>
+
+	<h3>
+		前言
+	</h3>
+	<div class="content">
+		先看看其他语言如何引入文件的：<br>
+		PHP:<br>
+		<span class="inline-code">include_once("file.php");</span><br>
+		<br>
+		Python and Java:<br>
+		<span class="inline-code">import file;</span><br>
+		<br>
+		javascript也有这个功能？<br>
+		<span class="inline-code">&lt;script&nbsp;src="file.js"&gt;&lt;/script&gt;</span>
+		<br>
+		<br>
+		动态引入js文件呢？<br>
+		<span class="code">var file = "filename.js";<br>
+		document.write('&lt;script&nbsp;src="'+file+'"&gt;&lt;/script&gt;');</span>
+		<br>
+		不要阻塞页面渲染？<br>
+		<span class="code">
+			var node = document.createElement('script');<br>
+			node.src = filename;<br>
+			node.async = true;<br>
+			document.body.appendChild(node);<br>
+		</span>
+		<br>
+		引入依赖文件加载完成再执行？<br>
+		避免文件重复加载？<br>
+		需要管理模块之间依赖关系？<br>
+		......(此处省略n+1字)
+
+	</div>
+	<h3>
+		开始模块化开发之路
+	</h3>
+	<div class="content">
+	<h4>HelloWorld！</h4><br>
+
+	在im.js同目录下建一个 <a href="hello.js" target="_blank">hello.js</a> 文件内容为：<br>
+	<code>
+	define(function(){<br>
+	<br>
+	&nbsp;&nbsp;var foo = "helloworld";<br>
+	<br>
+	&nbsp;&nbsp;return foo;<br>
+	<br>
+    });<br>
+    </code>
+    <br>
+    <br>
+    我们要调用这个模块时，你可以这样：<br>
+    <code class="exec">
+	require("hello.js", function(data){<br>
+		<br>
+	&nbsp;&nbsp;alert(data);&nbsp;&nbsp;&nbsp;&nbsp;//data是hello.js模块执行后返回的数据<br>
+	<br>
+    });<br>
+	</code>
+	正常弹出helloworld！
+	<br>
+	<br>
+	<h4>试探!</h4><br>
+	改动前面 <a href="hello.js" target="_blank">hello.js</a> 代码另存为 <a href="hello2.js" target="_blank">hello2.js</a>。 内容为：<br>
+	<code>
+	define(function(){<br>
+	<br>
+	&nbsp;&nbsp;var foo = "helloworld";<br>
+	<br>
+	&nbsp;&nbsp;<span class="warn">alert("正在执行hello2的方法");</span><br>
+	<br>
+	&nbsp;&nbsp;return foo;<br>
+	<br>
+	});<br>
+	</code>
+	<br>
+	调用hello2.js试试：<br>
+    <code class="exec">
+	require("<span class="warn">hello2</span>", function(data){//我懒得加.js后缀了<br>
+	<br>
+	&nbsp;&nbsp;alert(data);<br>
+	<br>
+    });<br>
+	</code>
+	由此可见，当require执行时会去加载对应模块，当模块完成加载后，执行模块内的匿名函数，
+	将其返回值当作参数传入到了require的回调函数中，并执行回调函数。
+	<br>
+	<br>
+	可以同时调用hello.js、hello2.js多个文件：<br>
+    <code class="exec">
+	require(<span class="warn">["hello","hello2"]</span>, function(data, data2){<br>
+	<br>
+	&nbsp;&nbsp;alert(data+" "+data2);<br>
+	<br>
+    });<br>
+	</code>
+	<br>
+	<h4>依赖</h4><br>
+	再次新建一个 <a href="html.js" target="_blank">html.js</a> 模块，内容为：<br>
+	<code>
+	define(<span class="warn">"hello"</span>, function(<span class="warn">str</span>){//依赖于hello模块 str为hello模块返回的数据<br>
+	<br>
+	&nbsp;&nbsp;function sethtml(){<br>
+	<br>
+	&nbsp;&nbsp;&nbsp;&nbsp;var elem = document.getElementById("code_ddd");<br>
+	<br>
+	&nbsp;&nbsp;&nbsp;&nbsp;elem.innerHTML = str;<br>
+	<br>
+	&nbsp;&nbsp;&nbsp;&nbsp;return elem;<br>
+	<br>
+	&nbsp;&nbsp;}<br>
+	<br>
+	&nbsp;&nbsp;return sethtml;&nbsp;&nbsp;//将这个方法返回<br>
+    });<br>
+    </code>
+    <div id="code_ddd" style="color:red"></div>
+    <br>
+    调用html.js：<br>
+    <code class="exec">
+	require("html", function(fn){<br>
+	<br>
+	&nbsp;&nbsp;fn();//执行这个方法<br>
+	<br>
+    });<br>
+	</code>
+	这里html.js依赖hello.js模块。<br>
+	文件加载过程为:<br>
+	&gt;&gt; <a href="html.js" target="_blank">html.js</a> &gt;&gt; <a href="hello.js" target="_blank">hello.js</a><br>
+	执行过程则是先执行hello.js<br>
+	<p>注意:开发时，模块间的依赖关系可能出现循环情况(如:a&gt;&gt;b&gt;&gt;c&gt;&gt;a)，Im.js会检测出来并报错。</p>
+	<br>
+	<h4>jQuery模块</h4><br>
+	这里已经有改造好的<a href="jquery.js" target="_blank">jquery.js</a>模块<br>
+	其实大致方式就是在jquery文件最后面加上下面代码：<br>
+	<code>
+	define(function(){<br>
+	&nbsp;&nbsp;return jQuery;&nbsp;&nbsp;//将jQuery返回 window.$ window.jQuery都可用<br>
+	&nbsp;&nbsp;//return jQuery.noConflict();&nbsp;&nbsp;//window.jQuery可用<br>
+	&nbsp;&nbsp;//return jQuery.noConflict(true);&nbsp;&nbsp;//window.$ window.jQuery都不可用<br>
+    });<br>
+    </code>
+	其他js库、框架的改造可以参考此方法。<br>
+    这里有个调用jquery栗子<a href="jqdemo.js" target="_blank">jqdemo.js</a>
+    <code class="exec">
+	require("jqdemo");<br>
+	</code>
+    <br>
+	<h4>正式环境模块打包</h4><br>
+	在开发环境下，模块颗粒会分得很细，方便代码的重用和维护，然而在正式环境下不合适太多http请求。因此，需要有工具将多个模块进行合并打包成一个js文件。<br>
+	im.js提供了一个简单的合并工具 <a href="#">imm</a><br>
+	工具需要安装node.js。打包时，只需配置好config.json，用node执行index.js。(配置说明见index.js源码)
+<br>
+<br>
+支持IE 5.5+ Chrome 3+ Firefox 2+ Safari 3.2+ Opera 10+<br>
+</div>
+
+<a href="https://www.github.com/fengdi/imjs">View on Github</a>
+<script src="im-min.js"></script>
+<script>
+require("exec");
+</script>
+</div>
+</body>
+</html>

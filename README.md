@@ -1,12 +1,14 @@
-# Imjs
+# Imjs v1.1
 ## A tiny javascript module loader
 
 `im.js` is a simple solution to modular javascript development.
 
 ### Features
- * URI即Id模块不需声明别名
+ * URI即模块Id,不需声明别名
  * 多依赖支持
  * 模块并行加载
+ * 循环依赖检测
+ * 支持模块合并
 
 ### How to use
 文件foo.js  
