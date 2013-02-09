@@ -132,9 +132,9 @@ var getInteractiveScriptPath = function (){
     return currentlyAddingScript && currentlyAddingScript.src;
 };
 
-var imPath = getInteractiveScriptPath();
-var docPath = (location.href+"").replace(/(\?|#).*$/i,"");
-imPath = path.isAP(imPath) ? imPath : path.dirname(docPath)+"/"+imPath;
+var imPath = getInteractiveScriptPath();// im.js路径
+var docPath = (location.href+"").replace(/(\?|#).*$/i,"");// 页面路径
+imPath = path.isAP(imPath) ? imPath : path.dirname(docPath)+"/"+imPath;//im.js完整路径
 
 //定义模块对象
 function Module(file, deps){
@@ -175,7 +175,7 @@ function Module(file, deps){
 		//加载依赖
 		self.loadDeps(function(){
 			self.state = COMPILING;
-			self.compile.apply(self, slice.call(arguments));
+			self.compile.apply(self, arguments);
 		});
 	});
 }
@@ -212,7 +212,7 @@ mix(Module.prototype,{
 		var self = this;
 		var factory = self.factory;
 		if(type(factory, "function")){
-			self.exports = factory.apply({},slice.call(arguments));
+			self.exports = factory.apply({},arguments);
 		}else{
 			self.exports = factory;
 		}
@@ -395,7 +395,7 @@ function require(deps, callback){
 	var args = arguments;
 	if(args.length>1){
 		moduleManager.load(deps||[],function(){
-			(callback||noop).apply(this, slice.call(arguments));
+			(callback||noop).apply(this, arguments);
 		});
 	}else{
 		if(type(deps,"array")||type(deps,"string")){

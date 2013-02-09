@@ -94,6 +94,7 @@
 		</span>
 		<br>
 		引入依赖文件加载完成再执行？<br>
+		可定义模块局部变量？<br>
 		避免文件重复加载？<br>
 		需要管理模块之间依赖关系？<br>
 		......(此处省略n+1字)
@@ -104,7 +105,8 @@
 	</h3>
 	<div class="content">
 	<h4>HelloWorld！</h4><br>
-
+	首先在页面引入im.js文件：<br>
+	<span class="inline-code">&lt;script&nbsp;src="im.js"&gt;&lt;/script&gt;</span> <br>
 	在im.js同目录下建一个 <a href="hello.js" target="_blank">hello.js</a> 文件内容为：<br>
 	<code>
 	define(function(){<br>
@@ -113,11 +115,11 @@
 	<br>
 	&nbsp;&nbsp;return foo;<br>
 	<br>
-    });<br>
+    });
     </code>
     <br>
     <br>
-    我们要调用这个模块时，你可以这样：<br>
+    我们要调用这个模块时，你可以执行这代码：<br>
     <code class="exec">
 	require("hello.js", function(data){<br>
 		<br>
