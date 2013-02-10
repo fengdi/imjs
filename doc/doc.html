@@ -201,9 +201,10 @@
 	<br>
 	<h4>jQuery模块</h4><br>
 	这里已经有改造好的<a href="jquery.js" target="_blank">jquery.js</a>模块<br>
-	其实大致方式就是在jquery文件最后面加上下面代码：<br>
+	其实大致方式就是用define方法包裹jquery代码：<br>
 	<code>
 	define(function(){<br>
+	&nbsp;&nbsp;...jquery代码
 	&nbsp;&nbsp;return jQuery;&nbsp;&nbsp;//将jQuery返回 window.$ window.jQuery都可用<br>
 	&nbsp;&nbsp;//return jQuery.noConflict();&nbsp;&nbsp;//window.jQuery可用<br>
 	&nbsp;&nbsp;//return jQuery.noConflict(true);&nbsp;&nbsp;//window.$ window.jQuery都不可用<br>

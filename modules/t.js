@@ -1,22 +1,5 @@
-/*
-		 _     _
-		| |   (_)
-		| |_   _ ___
-		| __| | / __|
-		| |_ _| \__ \
-		 \__(_) |___/
-		     _/ |
-		    |__/
 
-	t.js
-	a micro-templating framework in ~400 bytes gzipped
-
-	@author  Jason Mooberry <jasonmoo@me.com>
-	@license MIT
-	@version 0.1.0
-
-*/
-(function() {
+define(function() {
 
 	var blockregex = /\{\{(([@!]?)(.+?))\}\}(([\s\S]+?)(\{\{:\1\}\}([\s\S]+?))?)\{\{\/\1\}\}/g,
 		valregex = /\{\{([=%])(.+?)\}\}/g;
@@ -39,14 +22,12 @@
 		});
 	}
 
-	  
-	  // get_value({a:[{c:"r"}]}, "a.0.c"); // r
-	  function get_value(obj, path){
-	    (path+"").replace(/[^.]+/g,function(n){
-	    	obj = (obj!=void 0 && typeof obj=="object" && n in obj) ? obj[n] : void 0;
+	function get_value(obj, path){
+		(path+"").replace(/[^.]+/g,function(n){
+			obj = (obj!=void 0 && typeof obj=="object" && n in obj) ? obj[n] : void 0;
 	    });
-	    return obj;
-	  }
+		return obj;
+	}
 
 	function render(fragment, vars) {
 		return fragment
@@ -102,12 +83,8 @@
 		return render(this.t, vars);
 	};
 
-	window.t = t;
-
-})();
-
-define(function(){
   return t;
+  
 });
 
 

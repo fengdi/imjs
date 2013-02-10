@@ -2,6 +2,7 @@
 //     http://underscorejs.org
 //     (c) 2009-2012 Jeremy Ashkenas, DocumentCloud Inc.
 //     Underscore may be freely distributed under the MIT license.
+define(function(){
 
 (function() {
 
@@ -1218,6 +1219,8 @@
 
   });
 
-}).call(this);
+}).call(window);
 
-define(function(){return _});
+return _;
+
+});

@@ -1,4 +1,4 @@
-
+//OOP class.js 1.3.0
 define(function(){
 
 	var opt = Object.prototype.toString,

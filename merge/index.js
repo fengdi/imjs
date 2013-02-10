@@ -15,6 +15,20 @@
   "out":"..\\test\\merge.js"  //打包输出路径
 }
 
+
+注意：
+目前合并仅支持模块为标准的写法：
+define(function(){
+  var foo = "bar";   //你的代码;
+  return foo;
+});
+
+不支持以下形式的模块：
+var foo = "bar";     //你的代码（写到外面）;
+define(function(){
+  return foo;
+});
+
 * 然后用node执行此文件
 *
 */
@@ -42,7 +56,9 @@ function merge(file,callback){
     file = [file];
   }
   var that = this;
+  
   file.forEach(function(file){
+  
     this.define = function(deps, factory){
       var RS = '{${#factory#}$}';
       var moduleData = {
@@ -66,6 +82,7 @@ function merge(file,callback){
       }
       return JSON.stringify(moduleData).replace('"'+RS+'"',f.toString());
     };
+    
     
     code.push(vm.runInThisContext(fs.readFileSync(file)));
   });
