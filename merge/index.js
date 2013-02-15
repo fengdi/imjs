@@ -14,7 +14,7 @@
   ],
   "out":"..\\test\\merge.js"  //打包输出路径
 }
-
+* 然后用node执行此文件
 
 注意：
 目前合并仅支持模块为标准的写法：
@@ -29,7 +29,6 @@ define(function(){
   return foo;
 });
 
-* 然后用node执行此文件
 *
 */
 
@@ -94,7 +93,8 @@ function merge(file,callback){
 
 merge(config.modules,function(code){
   fs.writeFileSync(config.out, code);
-  console.log("OK!");
+  
+  console.log(config.out+" OK!");
 });
 
 

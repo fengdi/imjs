@@ -70,7 +70,8 @@
 		前言
 	</h3>
 	<div class="content">
-		先看看其他语言如何引入文件的：<br>
+		为什么需要模块化开发?  这问题搜索引擎找答案吧:-)<br>
+		我们先看看其他语言如何引入文件的：<br>
 		PHP:<br>
 		<span class="inline-code">include_once("file.php");</span><br>
 		<br>
@@ -119,7 +120,7 @@
     </code>
     <br>
     <br>
-    我们要调用这个模块时，你可以执行这代码：<br>
+    我们要调用这个模块时，你不需在页面引入 <a href="hello.js" target="_blank">hello.js</a> ，你仅需执行代码：<br>
     <code class="exec">
 	require("hello.js", function(data){<br>
 		<br>
@@ -193,18 +194,19 @@
 	<br>
     });<br>
 	</code>
-	这里html.js依赖hello.js模块。<br>
+	这里首先加载了html.js，然而html.js依赖hello.js模块，这时并没有立即执行html.js模块，而是去请求hello.js模块，hello.js模块没有依赖，就立即执行了hello.js，最后执行了html.js。<br>
 	文件加载过程为:<br>
 	&gt;&gt; <a href="html.js" target="_blank">html.js</a> &gt;&gt; <a href="hello.js" target="_blank">hello.js</a><br>
-	执行过程则是先执行hello.js<br>
+	执行过程则是:<br>
+	&nbsp;&nbsp;<a href="hello.js" target="_blank">hello.js</a> -&gt; <a href="html.js" target="_blank">html.js</a><br>
 	<p>注意:开发时，模块间的依赖关系可能出现循环情况(如:a&gt;&gt;b&gt;&gt;c&gt;&gt;a)，Im.js会检测出来并报错。</p>
 	<br>
 	<h4>jQuery模块</h4><br>
-	这里已经有改造好的<a href="jquery.js" target="_blank">jquery.js</a>模块<br>
+	这里有已经改造好的 <a href="jquery.js" target="_blank">jquery.js</a> 模块<br>
 	其实大致方式就是用define方法包裹jquery代码：<br>
 	<code>
 	define(function(){<br>
-	&nbsp;&nbsp;...jquery代码
+	&nbsp;&nbsp;...jquery代码(略)<br>
 	&nbsp;&nbsp;return jQuery;&nbsp;&nbsp;//将jQuery返回 window.$ window.jQuery都可用<br>
 	&nbsp;&nbsp;//return jQuery.noConflict();&nbsp;&nbsp;//window.jQuery可用<br>
 	&nbsp;&nbsp;//return jQuery.noConflict(true);&nbsp;&nbsp;//window.$ window.jQuery都不可用<br>
@@ -216,7 +218,7 @@
 	require("jqdemo");<br>
 	</code>
     <br>
-	<h4>正式环境模块打包</h4><br>
+	<h4>模块合并打包</h4><br>
 	在开发环境下，模块颗粒会分得很细，方便代码的重用和维护，然而在正式环境下不合适太多http请求。因此，需要有工具将多个模块进行合并打包成一个js文件。<br>
 	im.js提供了一个简单的合并工具 <a href="#">imm</a><br>
 	工具需要安装node.js。打包时，只需配置好config.json，用node执行index.js。(配置说明见index.js源码)
