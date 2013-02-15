@@ -108,7 +108,7 @@
 	<h4>HelloWorld！</h4><br>
 	首先在页面引入im.js文件：<br>
 	<span class="inline-code">&lt;script&nbsp;src="im.js"&gt;&lt;/script&gt;</span> <br>
-	在im.js同目录下建一个 <a href="hello.js" target="_blank">hello.js</a> 文件内容为：<br>
+	在im.js同目录下建一个 <a href="https://raw.github.com/fengdi/imjs/master/docs/hello.js" target="_blank">hello.js</a> 文件内容为：<br>
 	<code>
 	define(function(){<br>
 	<br>
@@ -120,7 +120,7 @@
     </code>
     <br>
     <br>
-    我们要调用这个模块时，你不需在页面引入 <a href="hello.js" target="_blank">hello.js</a> ，你仅需执行代码：<br>
+    我们要调用这个模块时，你不需在页面引入 <a href="https://raw.github.com/fengdi/imjs/master/docs/hello.js" target="_blank">hello.js</a> ，你仅需执行代码：<br>
     <code class="exec">
 	require("hello.js", function(data){<br>
 		<br>
@@ -132,7 +132,7 @@
 	<br>
 	<br>
 	<h4>试探!</h4><br>
-	改动前面 <a href="hello.js" target="_blank">hello.js</a> 代码另存为 <a href="hello2.js" target="_blank">hello2.js</a>。 内容为：<br>
+	改动前面 <a href="https://raw.github.com/fengdi/imjs/master/docs/hello.js" target="_blank">hello.js</a> 代码另存为 <a href="hello2.js" target="_blank">hello2.js</a>。 内容为：<br>
 	<code>
 	define(function(){<br>
 	<br>
@@ -167,7 +167,7 @@
 	</code>
 	<br>
 	<h4>依赖</h4><br>
-	再次新建一个 <a href="html.js" target="_blank">html.js</a> 模块，内容为：<br>
+	再次新建一个 <a href="https://raw.github.com/fengdi/imjs/master/docs/html.js" target="_blank">html.js</a> 模块，内容为：<br>
 	<code>
 	define(<span class="warn">"hello"</span>, function(<span class="warn">str</span>){//依赖于hello模块 str为hello模块返回的数据<br>
 	<br>
@@ -196,13 +196,13 @@
 	</code>
 	这里首先加载了html.js，然而html.js依赖hello.js模块，这时并没有立即执行html.js模块，而是去请求hello.js模块，hello.js模块没有依赖，就立即执行了hello.js，最后执行了html.js。<br>
 	文件加载过程为:<br>
-	&gt;&gt; <a href="html.js" target="_blank">html.js</a> &gt;&gt; <a href="hello.js" target="_blank">hello.js</a><br>
+	&gt;&gt; <a href="https://raw.github.com/fengdi/imjs/master/docs/html.js" target="_blank">html.js</a> &gt;&gt; <a href="hello.js" target="_blank">hello.js</a><br>
 	执行过程则是:<br>
-	&nbsp;&nbsp;<a href="hello.js" target="_blank">hello.js</a> -&gt; <a href="html.js" target="_blank">html.js</a><br>
+	&nbsp;&nbsp;<a href="https://raw.github.com/fengdi/imjs/master/docs/hello.js" target="_blank">hello.js</a> -&gt; <a href="html.js" target="_blank">html.js</a><br>
 	<p>注意:开发时，模块间的依赖关系可能出现循环情况(如:a&gt;&gt;b&gt;&gt;c&gt;&gt;a)，Im.js会检测出来并报错。</p>
 	<br>
 	<h4>jQuery模块</h4><br>
-	这里有已经改造好的 <a href="jquery.js" target="_blank">jquery.js</a> 模块<br>
+	这里有已经改造好的 <a href="https://raw.github.com/fengdi/imjs/master/docs/jquery.js" target="_blank">jquery.js</a> 模块<br>
 	其实大致方式就是用define方法包裹jquery代码：<br>
 	<code>
 	define(function(){<br>
@@ -213,14 +213,14 @@
     });<br>
     </code>
 	其他js库、框架的改造可以参考此方法。<br>
-    这里有个调用jquery栗子<a href="jqdemo.js" target="_blank">jqdemo.js</a>
+    这里有个调用jquery栗子<a href="https://raw.github.com/fengdi/imjs/master/docs/jqdemo.js" target="_blank">jqdemo.js</a>
     <code class="exec">
 	require("jqdemo");<br>
 	</code>
     <br>
 	<h4>模块合并打包</h4><br>
 	在开发环境下，模块颗粒会分得很细，方便代码的重用和维护，然而在正式环境下不合适太多http请求。因此，需要有工具将多个模块进行合并打包成一个js文件。<br>
-	im.js提供了一个简单的合并工具 <a href="#">imm</a><br>
+	im.js提供了一个简单的合并工具 <a href="https://github.com/fengdi/imjs/tree/master/merge" target="_blank">imm</a><br>
 	工具需要安装node.js。打包时，只需配置好config.json，用node执行index.js。(配置说明见index.js源码)
 <br>
 <br>
@@ -228,7 +228,7 @@
 </div>
 
 <a href="https://www.github.com/fengdi/imjs">View on Github</a>
-<script src="im-min.js"></script>
+<script src="https://raw.github.com/fengdi/imjs/master/docs/im-min.js"></script>
 <script>
 require("exec");
 </script>
