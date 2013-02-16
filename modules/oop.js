@@ -1,4 +1,8 @@
-//OOP class.js 1.3.0
+// OOP class.js 1.3.0
+// author Tangoboy
+// http://www.cnblogs.com/tangoboy/archive/2010/08/03/1790412.html
+// Dual licensed under the MIT or GPL Version 2 licenses.
+
 define(function(){
 
 	var opt = Object.prototype.toString,
