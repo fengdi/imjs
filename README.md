@@ -3,6 +3,8 @@
 
 `im.js` is a simple solution to modular javascript development.
 
+Only 2.5 KB gzipped (4.1 KB minified)
+
 ### Features
  * URI即模块Id,不需声明别名
  * 多依赖支持
