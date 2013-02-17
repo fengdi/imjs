@@ -94,19 +94,17 @@ var LOADING = 1,   // loading
   SAVED = 2,     // saved
   LOADED = 3,    // ready
   COMPILING = 4, // compiling
-  COMPILED = 5   // available
-;
+  COMPILED = 5;   // available
 
 var config = {
 	tag:"?t="+(+new Date())
 };
 var setConfig = function(c){
-	return mix(config,c||{});
+	return mix(config, c||{});
 };
 var currentlyAddingScript;
 //获取当前活动的正在执行的script标签的路径
 var getInteractiveScriptPath = function (){
-	//var doc = document;
     if(doc.currentScript){
         return doc.currentScript.src;
     }else{
@@ -142,7 +140,7 @@ function Module(file, deps){
 	//模块路径
 	self.file = file;
 	//模块状态
-	self.state = 1;
+	self.state = LOADING;
 	//对应的依赖模块
 	self.deps = deps || [];
 	//模块的工厂方法
@@ -171,7 +169,7 @@ function Module(file, deps){
 	});
 	self.on("save", function(){
 		self.state = SAVED;
-		moduleManager.checkCycle(self.file);
+		moduleManager.checkCycle(self.file);//检测依赖是否有循环
 		//加载依赖
 		self.loadDeps(function(){
 			self.state = COMPILING;
@@ -183,7 +181,6 @@ function Module(file, deps){
 mix(Module.prototype,{
 	load:function() {
 		//通过script 加载模块
-		//var doc = document;
 		var that = this;
 		var onerror = function(e){
 			//log("Imjs: load file "+that.file+" error! ","error");
@@ -209,10 +206,11 @@ mix(Module.prototype,{
 	},
 	//将工厂编译后存入模块exports
 	compile:function(){
-		var self = this;
-		var factory = self.factory;
+		var self = this
+			,factory = self.factory;
+
 		if(type(factory, "function")){
-			self.exports = factory.apply({},arguments);
+			self.exports = factory.apply({}, arguments);
 		}else{
 			self.exports = factory;
 		}
@@ -231,7 +229,7 @@ var moduleManager = {
 	//缓存用于存放加载模块
 	data:{},
 	//设置一个模块
-	set:function(id,mod){
+	set:function(id, mod){
 		this.data[id] = mod;
 	},
 	//获取一个模块
@@ -244,10 +242,12 @@ var moduleManager = {
 	},
 	//检测模块之间是否循环依赖
 	checkCycle:function(id, stack){
-		var that = this;
-		var deps;
-		var stack = stack || [];
-		var m = that.data[id];
+		var that = this
+			,deps
+			,m = that.data[id];
+			
+		stack = stack || [];
+
 		if(m){
 			if(!type(m.deps,"array")){
 				deps = [m.deps];
@@ -268,9 +268,10 @@ var moduleManager = {
 	},
 	//获得对应id模块的exports
 	exports:function(ids){
-		var that = this;
-		var re = [];
-		forEach(ids,function(id){
+		var that = this
+			,re = [];
+
+		forEach(ids, function(id){
 			var m = that.get(id);
 			re.push(m && m.exports);
 		});
@@ -278,9 +279,10 @@ var moduleManager = {
 	},
 	//对应id模块是否都已经加载完成
 	isOk:function(ids){
-		var that = this;
-		var v = 1;
-		forEach(ids,function(id){
+		var that = this
+			,v = 1;
+
+		forEach(ids, function(id){
 			var mod = that.data[id];
 			if(!mod || mod.state< COMPILED){
 				v = 0;
@@ -310,8 +312,9 @@ var moduleManager = {
 	},
 	//加载ids对应的模块
 	load:function(ids, callback){
-		var that = this;
-		var f = false;
+		var that = this
+			,f = false;//防止回调函数被执行多次
+		
 		//为每个id转换成真实uri路径
 		ids = that.realpaths(ids);
 		//如果没有依赖

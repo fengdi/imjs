@@ -89,8 +89,6 @@ build.process.forEach(function(process){
   		
     	build['var'].dateTime = (new Date()).toJSON();
   		
-		console.log(build['var']);
-
   		code = prepend + code;
     
 		code = tpl(code, build['var']);
