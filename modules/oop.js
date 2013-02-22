@@ -30,16 +30,33 @@ define(function(){
 	}
 
 	var $Class = {
-		//创建一个类  混合构造函数/原型方式
+		/**
+	     * 创建一个类  混合构造函数/原型方式.
+	     *
+	     * @param {Object} data 定义类成员的对象
+	     * @return {Function(Class)} 返回创建的类
+	     * @doc
+	     */
 		create: function(data) {
 			var obj = data.__ || function(){};
 			//过滤构造方法和原型方法
 			delete data.__;
 			this.include(obj, data);
-			obj.$super = createObject({}, obj);
+
+			//添加父类属性
+			obj.$super = createObject({}, Object); 
+			
 			return obj;
 		},
-		//继承  混合对象冒充原型链
+		/**
+	     * 继承  混合对象冒充原型链方式.
+	     *
+	     * @param {Function(Class)} source 父类
+	     * @param {Object} [extd] 定义类成员的对象
+	     * @param {Boolean} [execsuperc] 当子类被实例化时是否先执行父类构造函数
+	     * @return {Function(Class)} 返回创建的子类
+	     * @doc
+	     */
 		inherit:function(source, extd, execsuperc) {
 			if(!isFun(source))return;
 			execsuperc = execsuperc===false ? false : true;
@@ -53,25 +70,32 @@ define(function(){
 			} : function(){
 				obj.apply(this,arguments);
 			};
-			//原型链
+
+			//维持原型链
 			exobj.prototype = createObject(source.prototype, exobj);
 			//原型扩展
 			this.include(exobj, source.prototype);
 			this.include(exobj, extd);
+
+			//添加父类属性
 			exobj.$super = createObject(source.prototype, source);
 			return exobj;
 		},
-		//原型扩展
+		/**
+	     * 原型成员扩展.
+	     *
+	     * @param {Function(Class)} target 需要被原型拓展的类
+	     * @param {Object} [ptys] 定义原型成员的对象
+	     * @return {Function(Class)} 返回被拓展的类
+	     * @doc
+	     */
 		include:function(target, ptys){
 			if(!isFun(target)){target = function(){};}
 			if(isObj(ptys)){
 				mix(target.prototype, ptys);
 			}
 			return target;
-		}// ,
-		// isinheritof:function(src, re){
-		// 	while(src.super)
-		// }
+		}
 	};
 
 	return $Class;

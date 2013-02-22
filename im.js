@@ -132,6 +132,7 @@ var getInteractiveScriptPath = function (){
 
 var imPath = getInteractiveScriptPath();// im.js路径
 var docPath = (location.href+"").replace(/(\?|#).*$/i,"");// 页面路径
+docPath = docPath.match(/\/|\\$/g) ? docPath+"i" : docPath; //路径为/结尾时的处理
 imPath = path.isAP(imPath) ? imPath : path.dirname(docPath)+"/"+imPath;//im.js完整路径
 
 //定义模块对象
@@ -189,7 +190,7 @@ mix(Module.prototype,{
 		var head = doc.getElementsByTagName('head')[0] || doc.documentElement;
 	    var script = doc.createElement('script');
 	    script.type = 'text/javascript';
-	    script.async = true;
+	    script.async = "async";
 	    script.src = that.file;
 	    script.onerror = onerror;
 	    script.onload = script.onreadystatechange = function () {
