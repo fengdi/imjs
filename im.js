@@ -1,5 +1,5 @@
 // A tiny javascript module loader for the Web
-// v1.1 | MIT Licensed
+// Im.js v1.1 | MIT Licensed
 
 (function(global){
 var ud = void 0;
@@ -52,13 +52,18 @@ var log = function(s,t){
 	}
 };
 
+var rePtl = /^(\w+:\/\/\/?)(.*)/;
+
 var path = {
 	normalize : function (path) {
-		var protocol = "";
-		path = path.replace(/^\w+:\/\/\/?/,function(p){
-			protocol = p;
-			return "";
-		});
+		var m
+			,protocol = "";
+
+		if(m = path.match(rePtl)){
+			protocol = m[1];
+			path = m[2];
+		}
+
 		if (path.indexOf(".") === -1) {
 			return protocol + path;
 		}
@@ -78,6 +83,17 @@ var path = {
 		});
 		return protocol + ret.join("/").replace(":80/", "/");;
 	},
+	hostRoot:function(url) {
+		var protocol = ""
+			,original = ""
+			,m;
+
+		if(m = url.match(rePtl)){
+			protocol = m[1];
+			original = m[2].split("/")[0];
+		}
+		return protocol+original+"/";
+	},
 	dirname:function(path){
 		if(!path.match(/\//)){
 			return path = "./";
@@ -96,12 +112,7 @@ var LOADING = 1,   // loading
   COMPILING = 4, // compiling
   COMPILED = 5;   // available
 
-var config = {
-	tag:"?t="+(+new Date())
-};
-var setConfig = function(c){
-	return mix(config, c||{});
-};
+
 var currentlyAddingScript;
 //获取当前活动的正在执行的script标签的路径
 var getInteractiveScriptPath = function (){
@@ -130,16 +141,38 @@ var getInteractiveScriptPath = function (){
     return currentlyAddingScript && currentlyAddingScript.src;
 };
 
-var imPath = getInteractiveScriptPath();// im.js路径
-var docPath = (location.href+"").replace(/(\?|#).*$/i,"");// 页面路径
-docPath = docPath.match(/\/|\\$/g) ? docPath+"i" : docPath; //路径为/结尾时的处理
-imPath = path.isAP(imPath) ? imPath : path.dirname(docPath)+"/"+imPath;//im.js完整路径
+var imPath = (function(){
+	var imPath = getInteractiveScriptPath();// im.js路径
+
+	if(!path.isAP(imPath)){
+		var docPath = (location.href+"").replace(/(\?|#).*$/i,"");// 页面路径
+
+		if(imPath.match(/^\/|\\/g)){
+			docPath = path.hostRoot(docPath);
+		}else{
+			docPath = path.dirname(docPath.match(/\/|\\$/g) ? docPath+"i" : docPath);
+		}
+		imPath = docPath+"/"+imPath;
+	}
+	return imPath;
+})();
+
+var config = {
+	path:imPath,
+	tag:"?t="+(+new Date())
+};
+
+var setConfig = function(c){
+	return mix(config, c||{});
+};
 
 //定义模块对象
 function Module(file, deps){
 	var self = this;
 	//模块路径
 	self.file = file;
+	//是否为打包模块
+	self.pkg = 0;
 	//模块状态
 	self.state = LOADING;
 	//对应的依赖模块
@@ -162,21 +195,21 @@ function Module(file, deps){
 			});
 		}
 	};
-	self.on("load", function(){
+	self.on(LOADED, function(){
 		if(self.state < LOADED){
 			self.state = LOADED;
 		}
 	});
-	self.on("save", function(){
+	self.on(SAVED, function(){
 		if(self.state < SAVED){
 			self.state = SAVED;
 		}
 	});
-	self.on("compiling", function(){
+	self.on(COMPILING, function(){
 		if(self.state < COMPILING){
 			self.state = COMPILING;
-
-			if(!moduleManager.checkCycle(self.file)){//检测依赖是否有循环
+			var s = moduleManager.checkCycle(self.file);
+			if(!s){//检测依赖是否有循环
 				//加载依赖
 				self.loadDeps(function(){
 					
@@ -203,7 +236,7 @@ mix(Module.prototype,{
 	    script.onerror = onerror;
 	    script.onload = script.onreadystatechange = function () {
 	        if (!script.readyState || /loaded|complete/.test(script.readyState)) {
-	        	that.on("load");
+	        	that.on(LOADED);
 	            script && (script.onerror = script.onload = script.onreadystatechange = null);
 	            head && script && script.parentNode && head.removeChild(script);
 	            script = ud;
@@ -225,7 +258,7 @@ mix(Module.prototype,{
 		}
 
 		self.state = COMPILED;
-		self.on("compile");
+		self.on(COMPILED);
 	},
 	//加载依赖模块
 	loadDeps:function(fn){
@@ -313,7 +346,7 @@ var moduleManager = {
 		forEach(ids,function(id){
 			id = trim(id);
 			if(!path.isAP(id)){
-				id = path.normalize(path.dirname(imPath)+"/"+id);
+				id = path.normalize(path.dirname(config.path)+"/"+id);
 			}
 			//为uri添加一个统一的后缀
 			if(!/\.js$/.test(id)){
@@ -339,8 +372,8 @@ var moduleManager = {
 				var m = that.get(id);
 				if(!m){
 					m = new Module(id);
-					m.on("save",function(){
-						m.on("compiling");
+					m.on(SAVED, function(){
+						m.on(COMPILING);
 					});
 
 					setTimeout(function(){
@@ -349,14 +382,14 @@ var moduleManager = {
 					},1);
 					that.set(id, m);
 				}else{
-					if(m.state<COMPILING){
-						m.on("compiling");
+					//对打包模块进行编译
+					if(m.pkg && m.state<COMPILING){
+						m.on(COMPILING);
 					}
 				}
-
 				//如果模块状态进行中，绑定事件
 				if(m.state<COMPILED){
-					m.on("compile", function(){
+					m.on(COMPILED, function(){
 						//判断所有模块是否完成
 						if(that.isOk(ids)){
 							callback.apply(global, that.exports(ids));
@@ -392,8 +425,7 @@ function define(deps, factory){
 	if(mod){
 		mod.deps = d;
 		mod.factory = f;
-		mod.on("save");
-		mod.on("compiling");
+		mod.on(SAVED);
 	}else{
 		log("Can't find module:"+i,"error");
 	}
@@ -408,7 +440,8 @@ function defines(list){
 		moduleManager.set(id,m);
 		m.deps = d.deps||[];
 		m.factory = d.factory;
-		m.on("save");
+		m.pkg = 1;//标记为打包模块
+		m.on(SAVED);
 	});
 }
 
@@ -436,6 +469,7 @@ mix(global,{
 		 modules:moduleManager.data
 		,im:"1.1"
 		,log:log
+		,imPath:imPath
 		,config:setConfig
 	}
 });
