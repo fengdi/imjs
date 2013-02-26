@@ -162,20 +162,28 @@ function Module(file, deps){
 			});
 		}
 	};
-
 	self.on("load", function(){
 		if(self.state < LOADED){
 			self.state = LOADED;
 		}
 	});
 	self.on("save", function(){
-		self.state = SAVED;
-		moduleManager.checkCycle(self.file);//检测依赖是否有循环
-		//加载依赖
-		self.loadDeps(function(){
+		if(self.state < SAVED){
+			self.state = SAVED;
+		}
+	});
+	self.on("compiling", function(){
+		if(self.state < COMPILING){
 			self.state = COMPILING;
-			self.compile.apply(self, arguments);
-		});
+
+			if(!moduleManager.checkCycle(self.file)){//检测依赖是否有循环
+				//加载依赖
+				self.loadDeps(function(){
+					
+					self.compile.apply(self, arguments);
+				});
+			}
+		}
 	});
 }
 //模块的静态方法
@@ -215,6 +223,7 @@ mix(Module.prototype,{
 		}else{
 			self.exports = factory;
 		}
+
 		self.state = COMPILED;
 		self.on("compile");
 	},
@@ -245,27 +254,31 @@ var moduleManager = {
 	checkCycle:function(id, stack){
 		var that = this
 			,deps
+			,d
+			,re = false
 			,m = that.data[id];
 			
 		stack = stack || [];
 
 		if(m){
-			if(!type(m.deps,"array")){
+			if(!type(m.deps, "array")){
 				deps = [m.deps];
 			}else{
 				deps = m.deps;
 			}
 			deps = that.realpaths(deps);
-			forEach(deps, function(d){
+			while(d = deps.shift()){
 				if(indexOf(stack,d)==-1){
 					stack.push(d);
-					that.checkCycle(d, stack);
+					re = that.checkCycle(d, stack);
 				}else{
 					stack.push(stack[0]);
-					log("Circular dependencies:\r\n"+stack.join(" >>\r\n"),"error")
+					log("Circular dependencies:\r\n"+stack.join(" >>\r\n"),"error");
+					return true;
 				}
-			});
+			}
 		}
+		return re;
 	},
 	//获得对应id模块的exports
 	exports:function(ids){
@@ -326,14 +339,23 @@ var moduleManager = {
 				var m = that.get(id);
 				if(!m){
 					m = new Module(id);
+					m.on("save",function(){
+						m.on("compiling");
+					});
+
 					setTimeout(function(){
 						//防止插入标签时阻塞onsave事件
 						m.load();
 					},1);
 					that.set(id, m);
+				}else{
+					if(m.state<COMPILING){
+						m.on("compiling");
+					}
 				}
+
 				//如果模块状态进行中，绑定事件
-				if(m.state<5){
+				if(m.state<COMPILED){
 					m.on("compile", function(){
 						//判断所有模块是否完成
 						if(that.isOk(ids)){
@@ -371,6 +393,7 @@ function define(deps, factory){
 		mod.deps = d;
 		mod.factory = f;
 		mod.on("save");
+		mod.on("compiling");
 	}else{
 		log("Can't find module:"+i,"error");
 	}
@@ -385,12 +408,7 @@ function defines(list){
 		moduleManager.set(id,m);
 		m.deps = d.deps||[];
 		m.factory = d.factory;
-		modules.push(m);
-	});
-	forEach(modules,function(m){
-		if(m.state < SAVED){
-			m.on("save");
-		}
+		m.on("save");
 	});
 }
 
