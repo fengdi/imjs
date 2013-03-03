@@ -102,7 +102,7 @@ var path = {
 	},
 	//检测是否为带协议的绝对路径 http://a.com
 	isAP:function(path){
-		return !!path.match(/^\w+:\/\//);
+		return !!path.match(rePtl);
 	}
 };
 
@@ -436,27 +436,46 @@ function defines(list){
 	var modules = [];
 	forEach(list,function(d){
 		var id = moduleManager.realpaths(d.uri)[0];
+
 		var m = new Module(id);
+
 		moduleManager.set(id,m);
+		
 		m.deps = d.deps||[];
+		
 		m.factory = d.factory;
+		
 		m.pkg = 1;//标记为打包模块
-		m.on(SAVED);
+		
+		m.on(SAVED);//只保存不编译，以后根据需要编译包内对应模块
+
 	});
+
+	define(noop);//打包 本身是模块，触发包模块
 }
 
 //API 获取一个模块
 function require(deps, callback){
+	
 	var args = arguments;
+
 	if(args.length>1){
-		moduleManager.load(deps||[],function(){
+
+		moduleManager.load(deps||[], function(){
+			
 			(callback||noop).apply(this, arguments);
+
 		});
+
 	}else{
-		if(type(deps,"array")||type(deps,"string")){
-			moduleManager.load(deps||[],noop);
+		if(type(deps, "array")||type(deps, "string")){
+			
+			moduleManager.load(deps, noop);
+
 		}else if(type(deps,"function")){
+			
 			return deps();
+
 		}
 	}
 }
