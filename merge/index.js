@@ -5,7 +5,6 @@
 * 请先配置config.json:
 
 {
-  "impath":"..\\im.js",  //im.js或者im-min.js 相对此文件路径
   "modules":[            //即将打包的模块路径 
     "..\\test\\d.js",
     "..\\test\\c.js",
@@ -32,74 +31,93 @@ define(function(){
 *
 */
 
-var fs = require("fs");
-var path = require("path");
-var vm = require("vm");
-//配置信息
-var config = require("./config.json");
 
-var im = config.impath;
+//检测是否是node环境
+if(typeof process == "object" 
+    && "versions" in process 
+    && "node" in process.versions){
+    
+  (function(){
 
-//类型判断
-var type = function(obj, type) {
-	var ts = {}.toString,
-		t = obj===null ? 'null' :
-		(typeof obj=='undefined' && 'undefined' || ts.call(obj).slice(8,-1).toLowerCase());
-	return type ? t===type : t;
-}
+      var fs = require("fs");
+      var path = require("path");
+      var vm = require("vm");
+      //配置信息
+      var config = require("./config.json");
 
-function merge(file,callback){
-  var code = [];
+      var im = config.impath || process.mainModule.filename || "./";
 
-  if(!type(file,"array")){
-    file = [file];
-  }
-  var that = this;
-  
-  file.forEach(function(file){
-  
-    this.define = function(deps, factory){
-      var RS = '{${#factory#}$}';
-      var moduleData = {
-        uri:path.relative(path.dirname(im),file).replace(new RegExp("\\"+path.sep,'g'),"/"),//路径要转换成相对im.js路径
-        deps:[],
-        factory:RS
-      };
-      var f = function(){};
-      var args = arguments;
-      
-      if(args.length==1){
-        if(type(deps,"function")){
-          f = deps;
-        }else{
-          moduleData.factory = deps;
-        }
-      }else{
-        moduleData.deps = deps;
-        
-        f = factory;
+      //类型判断
+      var type = function(obj, type) {
+        var ts = {}.toString,
+          t = obj===null ? 'null' :
+          (typeof obj=='undefined' && 'undefined' || ts.call(obj).slice(8,-1).toLowerCase());
+        return type ? t===type : t;
       }
-      return JSON.stringify(moduleData).replace('"'+RS+'"', function(){
-        //参数2不能直接传字符串 因为有： \\1匹配1  \\$& 指原字符串 
+
+      function merge(file,callback){
+        var code = [];
+
+        if(!type(file,"array")){
+          file = [file];
+        }
+        var that = this;
         
-        return f.toString();
+        file.forEach(function(file){
         
+          this.define = function(deps, factory){
+            var RS = '{${#factory#}$}';
+            var moduleData = {
+              uri:path.relative(path.dirname(im),file).replace(new RegExp("\\"+path.sep,'g'),"/"),//路径要转换成相对im.js路径
+              deps:[],
+              factory:RS
+            };
+            var f = function(){};
+            var args = arguments;
+            
+            if(args.length==1){
+              if(type(deps,"function")){
+                f = deps;
+              }else{
+                moduleData.factory = deps;
+              }
+            }else{
+              moduleData.deps = deps;
+              
+              f = factory;
+            }
+            return JSON.stringify(moduleData).replace('"'+RS+'"', function(){
+              //参数2不能直接传字符串 因为有： \\1匹配1  \\$& 指原字符串 
+              
+              return f.toString();
+            });
+          };
+          
+          
+          code.push(vm.runInThisContext(fs.readFileSync(file)));
+        });
+        
+        
+        code = ';defines(['+code.join(",")+']);';
+        callback(code);
+      }
+
+      merge(config.modules,function(code){
+        fs.writeFileSync(config.out, code);
+        console.log(config.out+" OK!");
       });
-    };
-    
-    
-    code.push(vm.runInThisContext(fs.readFileSync(file)));
-  });
+  })();
   
   
-  code = ';defines(['+code.join(",")+']);';
-  callback(code);
+  return ;
 }
 
-merge(config.modules,function(code){
-  fs.writeFileSync(config.out, code);
-  
-  console.log(config.out+" OK!");
-});
+
+
+
+
+
+
+
 
 
