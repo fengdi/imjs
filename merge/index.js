@@ -79,7 +79,12 @@ function merge(file,callback){
         
         f = factory;
       }
-      return JSON.stringify(moduleData).replace('"'+RS+'"',f.toString());
+      return JSON.stringify(moduleData).replace('"'+RS+'"', function(){
+        //参数2不能直接传字符串 因为有： \\1匹配1  \\$& 指原字符串 
+        
+        return f.toString();
+        
+      });
     };
     
     
