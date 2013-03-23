@@ -235,7 +235,7 @@ mix(Module.prototype,{
 	    script.src = that.file;
 	    script.onerror = onerror;
 	    script.onload = script.onreadystatechange = function () {
-	        if (!script.readyState || /loaded|complete/.test(script.readyState)) {
+	        if (/loaded|complete|undefined/.test(script.readyState)) {
 	        	that.on(LOADED);
 	            script && (script.onerror = script.onload = script.onreadystatechange = null);
 	            head && script && script.parentNode && head.removeChild(script);
@@ -300,12 +300,18 @@ var moduleManager = {
 				deps = m.deps;
 			}
 			deps = that.realpaths(deps);
+
 			while(d = deps.shift()){
 				if(indexOf(stack,d)==-1){
 					stack.push(d);
 					re = that.checkCycle(d, stack);
+					if(re){
+						return re;
+					}else{
+						stack.pop();
+					}
 				}else{
-					stack.push(stack[0]);
+					stack.push(d);
 					log("Circular dependencies:\r\n"+stack.join(" >>\r\n"),"error");
 					return true;
 				}
@@ -451,7 +457,7 @@ function defines(list){
 
 	});
 
-	define(noop);//打包 本身是模块，触发包模块
+	//define(noop);//打包 本身是模块，触发包模块
 }
 
 //API 获取一个模块
