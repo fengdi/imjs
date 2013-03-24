@@ -1,9 +1,9 @@
-# Imjs v1.1
+# Imjs v1.2
 ## A tiny javascript module loader
 
 `im.js` is a simple solution to modular javascript development.
 
-Only 2.5 KB gzipped (4.1 KB minified)
+Only 2.3 KB gzipped (4.4 KB minified)
 
 ### Features
  * URI即模块Id,不需声明别名
@@ -13,22 +13,26 @@ Only 2.5 KB gzipped (4.1 KB minified)
  * 支持模块合并
 
 ### How to use
-文件foo.js  
-define(function(){
+文件foo.js:
 
-  //定义模块  
-  return "this is foo!"
+    define(function(){
+
+        //在模块内实现一些功能，最后返回 
+        return "this is foo!"
   
-});
+    });
 
-require("foo",function(foo){
+调用foo模块：
 
-  //调用模块   
-  alert(foo);
+    require("foo",function(foo){
+
+       //调用模块返回的值
+       alert(foo);
   
-});
+    });
 
 
-For more advanced usage check the [`快速上手.html`](http://fengdi.github.com/imjs/test.html).
+For more advanced usage check the [`快速上手`](http://fengdi.github.com/imjs/test.html)、
+[`模块合并`](https://github.com/fengdi/imjs/wiki/%E6%A8%A1%E5%9D%97%E5%90%88%E5%B9%B6%E5%8A%9F%E8%83%BD%E8%AF%B4%E6%98%8E).
 
 This software is released under the MIT license.
