@@ -17,8 +17,8 @@ Only 2.3 KB gzipped (4.4 KB minified)
 
     define(function(){
 
-        //在模块内实现一些功能，最后返回 
-        return "this is foo!"
+        //在模块内实现一些功能（函数、类、甚至库等）, 最后返回 
+        return "this is foo!";
   
     });
 
