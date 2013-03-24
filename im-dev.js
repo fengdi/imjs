@@ -1,4 +1,4 @@
-//im.js v1.2 2013-03-23T21:56:10.118Z
+//im.js v1.2 2013-03-24T16:41:21.414Z
 /*
 *
 * im模块合并器
@@ -616,7 +616,7 @@ mix(global,{
 	,defines:defines
 	,Im:{
 		 modules:moduleManager.data
-		,im:"1.1"
+		,im:"1.2"
 		,log:log
 		,imPath:imPath
 		,config:setConfig

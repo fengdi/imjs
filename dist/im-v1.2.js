@@ -492,7 +492,7 @@ mix(global,{
 	,defines:defines
 	,Im:{
 		 modules:moduleManager.data
-		,im:"1.1"
+		,im:"1.2"
 		,log:log
 		,imPath:imPath
 		,config:setConfig
