@@ -6,6 +6,15 @@ var ud = void 0;
 var doc = document;
 var epa = [];
 var slice = epa.slice;
+var noop = function(){};
+var rePtl = /^(\w+:\/\/\/?)(.*)/;
+var LOADING = 1,   // loading
+  SAVED = 2,     // saved
+  LOADED = 3,    // ready
+  COMPILING = 4, // compiling
+  COMPILED = 5;   // available
+
+//遍历
 var forEach = epa.forEach ?
 function(arr, fn) {
   arr.forEach(fn);
@@ -15,6 +24,7 @@ function(arr, fn) {
     fn(arr[i], i, arr);
   }
 };
+//元素在数组中的位置
 var indexOf = epa.indexOf ? 
 function(arr, v) {
   return arr.indexOf(v);
@@ -28,10 +38,11 @@ function(arr, v) {
   return -1;
 };
 
-var noop = function(){};
+//去除字符串两端空白
 var trim =  function( text ) {
 	return (text || "").replace(/^(\s|\u00A0)+|(\s|\u00A0)+$/g, "" );
 };
+//对象混合
 var mix = function(a, b){
 	for (var k in b) {
 		a[k] = b[k];
@@ -45,6 +56,7 @@ var type = function(obj, type) {
 		(obj===ud && 'undefined' || ts.call(obj).slice(8,-1).toLowerCase());
 	return type ? t===type : t;
 };
+//日志打印
 var log = function(s,t){
 	t = t || 'log';
 	if('console' in global){
@@ -52,8 +64,7 @@ var log = function(s,t){
 	}
 };
 
-var rePtl = /^(\w+:\/\/\/?)(.*)/;
-
+//路径相关的处理函数
 var path = {
 	normalize : function (path) {
 		var m
@@ -106,11 +117,7 @@ var path = {
 	}
 };
 
-var LOADING = 1,   // loading
-  SAVED = 2,     // saved
-  LOADED = 3,    // ready
-  COMPILING = 4, // compiling
-  COMPILED = 5;   // available
+
 
 
 var currentlyAddingScript;
@@ -165,8 +172,13 @@ var config = {
 var setConfig = function(c){
 	return mix(config, c||{});
 };
-
-//定义模块对象
+/**
+ * 模块类
+ * @class Module
+ * @param { String } file   模块文件完整路径
+ * @param { String|Array } deps (Optional) 模块依赖其他模块，多个依赖可以是数组形式
+ * @remark
+ */
 function Module(file, deps){
 	var self = this;
 	//模块路径
@@ -190,32 +202,25 @@ function Module(file, deps){
 		if(fn){
 			self._on[name].push(fn);
 		}else{
+			if(!isNaN(name)){
+				if(self.state < name){
+					self.state = name;
+				}
+			}
 			forEach(self._on[name], function(fn){
 				fn.call(self);
 			});
 		}
 	};
-	self.on(LOADED, function(){
-		if(self.state < LOADED){
-			self.state = LOADED;
-		}
-	});
-	self.on(SAVED, function(){
-		if(self.state < SAVED){
-			self.state = SAVED;
-		}
-	});
+
+	//绑定一个compiling事件，触发时，开始加载依赖，完成后开始编译
 	self.on(COMPILING, function(){
-		if(self.state < COMPILING){
-			self.state = COMPILING;
-			var s = moduleManager.checkCycle(self.file);
-			if(!s){//检测依赖是否有循环
-				//加载依赖
-				self.loadDeps(function(){
-					
-					self.compile.apply(self, arguments);
-				});
-			}
+		var s = moduleManager.checkCycle(self.file);
+		if(!s){//检测依赖是否有循环
+			//加载依赖
+			self.loadDeps(function(){
+				self.compile.apply(self, arguments);
+			});
 		}
 	});
 }
@@ -374,7 +379,7 @@ var moduleManager = {
 		if(ids.length==0){
 			callback();
 		}else{
-			forEach(ids,function(id){
+			forEach(ids, function(id){
 				var m = that.get(id);
 				if(!m){
 					m = new Module(id);
@@ -413,7 +418,23 @@ var moduleManager = {
 	}
 };
 
-//API 定义一个模块
+/**
+ * 定义一个模块
+ * @method define
+ * @static
+ * @param { String|Array } deps (Optional)   模块依赖其他模块，多个依赖可以是数组形式
+ * @param { Function|Object|String } factory    模块的工厂函数，必须要有返回值。与通常的闭包方式里的函数类似 (function(){})()，
+ 							传入的参数分别与 deps对应模块返回值对应
+ * @example 
+ * define(function(){
+ * 		return "foo";
+ * });
+ * 或者
+ * define(["aModule", "bModule"], function(a, b){
+ *		return a+b;
+ * });
+ * @remark
+ */
 function define(deps, factory){
 	var args = arguments
 	,i = getInteractiveScriptPath()
@@ -436,18 +457,29 @@ function define(deps, factory){
 		log("Can't find module:"+i,"error");
 	}
 }
-//API 定义模块包
-//[{uri,deps,factory},]
+/**
+ * 定义模块包 （主要用工具打包后的文件）
+ * @method defines
+ * @static
+ * @param { Array } list  定义模块的一个包含对象的数组
+ * @example 
+ * defines([{
+ * 		uri:"module",
+ *      deps:[],
+ *      function(){
+ *         return "foo";
+ *      }
+ * }]);
+ * @remark 用打包工具自动将多个模块文件合并生成调用defines的代码
+ */
 function defines(list){
 	var modules = [];
-	forEach(list,function(d){
+	forEach(list, function(d){
 		var id = moduleManager.realpaths(d.uri)[0];
 
-		var m = new Module(id);
+		var m = new Module(id, d.deps);
 
 		moduleManager.set(id,m);
-		
-		m.deps = d.deps||[];
 		
 		m.factory = d.factory;
 		
@@ -460,27 +492,37 @@ function defines(list){
 	//define(noop);//打包 本身是模块，触发包模块
 }
 
-//API 获取一个模块
-function require(deps, callback){
+/**
+ * 获取一个模块
+ * @method require
+ * @static
+ * @param { String|Array } ids  要请求的模块
+ * @param { Function } callback   加载完成模块后的回调函数
+ * @example 
+ * require("a", function(a){
+ * 		return "foo";
+ * });
+ */
+function require(ids, callback){
 	
 	var args = arguments;
 
 	if(args.length>1){
 
-		moduleManager.load(deps||[], function(){
+		moduleManager.load(ids||[], function(){
 			
 			(callback||noop).apply(this, arguments);
 
 		});
 
 	}else{
-		if(type(deps, "array")||type(deps, "string")){
+		if(type(ids, "array")||type(ids, "string")){
 			
-			moduleManager.load(deps, noop);
+			moduleManager.load(ids, noop);
 
-		}else if(type(deps,"function")){
+		}else if(type(ids,"function")){
 			
-			return deps();
+			return ids();
 
 		}
 	}
