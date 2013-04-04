@@ -1,40 +1,13 @@
+<link rel="stylesheet" href="lib/qunit-1.11.0.css"/>
+<script src="lib/qunit-1.11.0.js"></script>
+
+
 <script src="../im.js"></script>
-<script>
+<script src="merge/merge.js"></script>
 
-// require("test/a", function(a){
-// 	console.log(a);
-// });
-
-// require(["test/order/a","test/order/b","test/order/c","test/order/d","test/order/e",
-// 	"test/order/f","test/order/g","test/order/h"], function(a){
-
-// 	console.log(window.te.s.t.o.r.d.e.r.test);
-	
-// });
-
-
-// require("test/cycle/a", function(re){
-
-// 	console.log(re);
-
-// });
-
-require("test/merge/merge",function(){
-	
-	require("test/merge/a", function(re){
-		console.log(re);
-	});
-
-});
-
-Im.config({
-	tag:""
-});
-
-
-
-//require("test/repeat/a");
-
-</script>
-
+<div id="qunit"></div>
+<div id="qunit-fixture"></div>
 <h4></h4>
+
+
+<script src="tests.js"></script>

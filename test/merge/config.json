@@ -1,0 +1,9 @@
+{
+  "impath":"..\\..\\im.js",
+  "modules":[
+    "c.js",
+    "b.js",
+    "a.js"
+  ],
+  "out":"merge.js"
+}
