@@ -3,14 +3,16 @@
 
 `im.js` is a simple solution to modular javascript development.
 
-Only 2.3 KB gzipped (4.4 KB minified)
+Only 2.3 KB gzipped (4.3 KB minified)
 
 ### Features
  * URI即模块Id,不需声明别名
- * 多依赖支持
- * 模块并行加载
- * 循环依赖检测
- * 支持模块合并
+ * 支持模块缓存，不需多次请求
+ * 模块多依赖支持
+ * 多模块并行加载（仅支持并行加载）
+ * 支持对模块循环依赖关系检测
+ * 支持模块合并，im-dev.js版同时有模块加载和模块合并功能
+ * 路径保持简单，约定模块路径都相对于Im.js路径
 
 ### How to use
 文件foo.js:
