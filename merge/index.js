@@ -32,10 +32,6 @@ define(function(){
 */
 
 
-//检测是否是node环境
-if(typeof process == "object" 
-    && "versions" in process 
-    && "node" in process.versions){
     
   (function(){
 
@@ -107,12 +103,6 @@ if(typeof process == "object"
         console.log(config.out+" OK!");
       });
   })();
-  
-  
-  return ;
-}
-
-
 
 
 

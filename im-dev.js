@@ -1,4 +1,12 @@
-//im.js v1.2 2013-04-03T14:02:42.753Z
+//im.js v1.2 2014-03-29T10:17:25.267Z
+
+
+
+//检测是否是node环境
+if(typeof process == "object" 
+    && "versions" in process 
+    && "node" in process.versions){
+
 /*
 *
 * im模块合并器
@@ -33,10 +41,6 @@ define(function(){
 */
 
 
-//检测是否是node环境
-if(typeof process == "object" 
-    && "versions" in process 
-    && "node" in process.versions){
     
   (function(){
 
@@ -108,10 +112,6 @@ if(typeof process == "object"
         console.log(config.out+" OK!");
       });
   })();
-  
-  
-  return ;
-}
 
 
 
@@ -121,6 +121,9 @@ if(typeof process == "object"
 
 
 
+
+}else{
+//浏览器环境
 
 // A tiny javascript module loader for the Web
 // Im.js v1.2 | MIT Licensed
@@ -188,7 +191,7 @@ var log = function(s,t){
 	}
 };
 
-
+//路径相关的处理函数
 var path = {
 	normalize : function (path) {
 		var m
@@ -296,8 +299,13 @@ var config = {
 var setConfig = function(c){
 	return mix(config, c||{});
 };
-
-//定义模块对象
+/**
+ * 模块类
+ * @class Module
+ * @param { String } file   模块文件完整路径
+ * @param { String|Array } deps (Optional) 模块依赖其他模块，多个依赖可以是数组形式
+ * @remark
+ */
 function Module(file, deps){
 	var self = this;
 	//模块路径
@@ -661,3 +669,8 @@ mix(global,{
 });
 
 })(this);
+
+
+}
+
+

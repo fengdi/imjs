@@ -85,11 +85,14 @@ build.process.forEach(function(process){
 
 	var prepend = process.prepend || "";//文件头插入内容
 
+	var append = process.append || "";//文件尾插入内容
+
+
 	operate[process.operate](files,function(code){
   		
     	build['var'].dateTime = (new Date()).toJSON();
   		
-  		code = prepend + code;
+  		code = prepend + code + append;
     
 		code = tpl(code, build['var']);
     

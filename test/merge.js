@@ -11,9 +11,7 @@
   //模块依赖c模块
   
 	return "b "+c;
-}},{"uri":"test/a.js","deps":["test/b.js","modules/sizzle"],"factory":function (c, $){
-	//模块依赖b模块
-	var h4 = $("h4")[0];
-
-	return h4.innerHTML+" a "+c;
+}},{"uri":"test/a.js","deps":"test/b.js","factory":function (c){
+	
+	return "a "+c;
 }}]);

@@ -15,8 +15,11 @@
       "operate":"merge",
       "prepend":"//im.js v{#{version}#} {#{dateTime}#}\r\n",
       "from":[
+         "..\\merge\\if-node.js",
          "..\\merge\\index.js",
-         "..\\im.js"
+         "..\\merge\\else-node.js",
+         "..\\im.js",
+         "..\\merge\\end-if-node.js"
       ]
     }
   ]
