@@ -1,0 +1,16 @@
+{
+  "impath":"im.js",
+  "modules":[            //即将打包的模块路径 
+    "app.js",
+    "views\\app-view.js",
+    "views\\todo-view.js",
+    "routers\\router.js",
+    "models\\todo.js",
+    "collections\\todos.js",
+    "librarys\\backbone.js",
+    "librarys\\backbone.localStorage.js",
+    "librarys\\underscore.js",
+    "librarys\\jquery.js"
+  ],
+  "out":"release.js"  //打包输出路径
+}
