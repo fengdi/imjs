@@ -7,8 +7,6 @@
 
 Only 2.3 KB gzipped (4.3 KB minified)
 
-support IE6+.
-
 ### Features
  * 符合AMD的匿名模块规范,不需声明别名
  * 支持模块缓存，不需多次请求
@@ -68,7 +66,7 @@ support IE6+.
 
 执行顺序为: foo => bar => 入口
 
-当大规模开发时，模块有很多，依赖关系复杂，Im.js就是用来管理这些模块的
+当大规模开发时，模块就可能有很多，依赖关系复杂，而Im.js就是用来管理这些模块的。
 
 
 下图是实际开发中可能出现的关系图：
@@ -85,7 +83,7 @@ support IE6+.
 
 出现循环的关系是：
 
-0 -> 1 -> 7 -> 8 -> 9 -> 1 这是不合法的
+0 -> 1 -> 7 -> 8 -> 9 -> 1 这是不合法的，Im.js会检测出循环依赖并报错。
 
 ----------
 For more advanced usage check the [`快速上手`](http://fengdi.github.com/imjs/test.html)、
