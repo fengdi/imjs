@@ -139,7 +139,7 @@ var getInteractiveScriptPath = function (){
         return doc.currentScript.src;
     }else{
         //ie6-10 得到当前正在执行的script标签
-        var scripts = doc.getElementsByTagName('script');
+        var scripts = doc.scripts || doc.getElementsByTagName('script');
         for (var i = scripts.length - 1; i > -1; i--) {
             if (scripts[i].readyState === 'interactive') {
                 return scripts[i].src;
@@ -149,14 +149,13 @@ var getInteractiveScriptPath = function (){
         var stack;// = (new Error()).stack;
         try{
         	arguments.length(); //强制报错,以便捕获e.stack
-		}catch(e){
-			stack = e.stack || 
-			(global.opera && ((e+"").match(/of linked script \S+/g) || []).join(" "));
+        }catch(e){
+          stack = e.stack || 
+          (global.opera && ((e+"").match(/of linked script \S+/g) || []).join(" "));
         }
-        stack = stack.split( /[@ ]/g).pop();//取得最后一行,最后一个空格或@之后的部分
-		return stack.replace(/(:\d+)?:\d+(\s)?$/i, "");//去掉行号与或许存在的出错字符起始位置
+        stack = stack.split(/[@ ]/g).pop();//取得最后一行,最后一个空格或@之后的部分
+        return stack.replace(/(:\d+)?:\d+(\s)?$/i, "");//去掉行号与或许存在的出错字符起始位置
     }
-
     return currentlyAddingScript && currentlyAddingScript.src;
 };
 
