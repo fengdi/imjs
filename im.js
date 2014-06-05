@@ -1,5 +1,17 @@
 // A tiny javascript module loader for the Web
-// Im.js v1.2 | MIT Licensed
+// Im.js v1.3 | MIT Licensed
+// https://github.com/fengdi/imjs
+/*
+ ______                                  
+/\__  _\                    __           
+\/_/\ \/     ___ ___       /\_\    ____  
+   \ \ \   /' __` __`\     \/\ \  /',__\ 
+    \_\ \__/\ \/\ \/\ \  __ \ \ \/\__, `\
+    /\_____\ \_\ \_\ \_\/\_\_\ \ \/\____/
+    \/_____/\/_/\/_/\/_/\/_/\ \_\ \/___/ 
+                           \ \____/      
+                            \/___/      
+*/
 
 (function(global){
 var ud = void 0;
@@ -457,6 +469,9 @@ function define(deps, factory){
 		log("Can't find module:"+i,"error");
 	}
 }
+
+define.tmd = true;//Tiny Module Definition amd精简版
+    
 /**
  * 定义模块包 （主要用工具打包后的文件）
  * @method defines
@@ -534,7 +549,7 @@ mix(global,{
 	,defines:defines
 	,Im:{
 		 modules:moduleManager.data
-		,im:"1.2"
+		,im:"1.3"
 		,log:log
 		,imPath:imPath
 		,config:setConfig
