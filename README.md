@@ -72,6 +72,7 @@ support IE6+.
 
 
 下图是实际开发中可能出现的关系图：
+
 ![](http://img03.taobaocdn.com/imgextra/i3/583325539/TB2iIsqXXXXXXamXFXXXXXXXXXX-583325539.jpg)
 
 其中合法的依赖关系为：
