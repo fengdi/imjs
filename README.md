@@ -62,7 +62,7 @@ Only 2.3 KB gzipped (4.3 KB minified)
 
 这里require模块bar时，
 
-依赖顺序为: 入口 => bar => foo
+依赖(请求)顺序为: 入口 => bar => foo
 
 执行顺序为: foo => bar => 入口
 
