@@ -38,7 +38,8 @@ define(function() {
             list = cache[event] || (cache[event] = []);
             list.push({
                 callback:callback,
-                context:context
+                context:context,
+                eventName:event
             });
         }
 
@@ -133,7 +134,25 @@ define(function() {
 
         return this;
     }
+    
+    
+    
+    var keys = Object.keys;
 
+    if (!keys) {
+      keys = function(o) {
+        var result = [];
+
+        for (var name in o) {
+          if (o.hasOwnProperty(name)) {
+            result.push(name);
+          }
+        }
+        return result;
+      };
+    }
+
+    
 
     return Events;
-})
+});
