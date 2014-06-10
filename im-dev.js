@@ -1,4 +1,4 @@
-//im.js v1.3 2014-06-10T20:15:43.375Z
+//im.js v1.3 2014-06-10T22:05:01.689Z
 
 
 
@@ -195,7 +195,6 @@ var jsonMinify = function(json) {
 var ud = void 0;
 var doc = document;
 var epa = [];
-var uid = 0;
 var slice = epa.slice;
 var noop = function(){};
 var rePtl = /^(\w+:\/\/\/?)(.*)/;
@@ -420,7 +419,6 @@ mix(Module.prototype,{
 	load:function() {
 		//通过script 加载模块
 		var that = this;
-        var waitId = uid;
 		var onerror = function(e){
 			//log("Imjs: load file "+that.file+" error! ","error");
 			moduleManager.remove(that.file);
@@ -439,7 +437,7 @@ mix(Module.prototype,{
 	    script.onload = script.onreadystatechange = function () {
             
 	        if (reState.test(script.readyState)) {
-	        	that.on(LOADED);
+	        	that.on(SAVED);
 	            script && (script.onerror = script.onload = script.onreadystatechange = null);
 	            head && script && script.parentNode && head.removeChild(script);
 	            script = ud;
@@ -448,13 +446,12 @@ mix(Module.prototype,{
                 //B:after doSomething
                 
                 //加载非AMD模块时，uid未变化所以仍然等于之前waitId
-                if(uid === waitId){
-                    uid++;
+                if(that.state < LOADED){
                     var mod = moduleManager.get(that.file);
-                    if(mod){
-                        mod.deps = [];
-                        mod.factory = function(){};
-                        mod.on(SAVED);
+                    if(that == mod){
+                        that.deps = [];
+                        that.factory = noop;
+                        that.on(LOADED);
                     }
                 }
                 
@@ -475,8 +472,9 @@ mix(Module.prototype,{
 		}else{
 			self.exports = factory;
 		}
-
+        
 		self.state = COMPILED;
+        
 		self.on(COMPILED);
 	},
 	//加载依赖模块
@@ -597,7 +595,7 @@ var moduleManager = {
 				var m = that.get(id);
 				if(!m){
 					m = new Module(id);
-					m.on(SAVED, function(){
+					m.on(LOADED, function(){
 						m.on(COMPILING);
 					});
 
@@ -622,10 +620,10 @@ var moduleManager = {
 					});
 				}else{
 					//立即判断所有模块是否完成
-					if(that.isOk(ids) && !f){
-						f = true;
-						callback.apply(global, that.exports(ids));
-					}
+                    if(that.isOk(ids) && !f){
+                        f = true;
+                        callback.apply(global, that.exports(ids));
+                    }
 				}
 			});
 		}
@@ -651,8 +649,6 @@ var moduleManager = {
  */
 function define(deps, factory){
     
-    uid++;
-    
 	var args = arguments
 	,i = path.getPath(getInteractiveScriptPath())
 	,d = []
@@ -669,7 +665,7 @@ function define(deps, factory){
 	if(mod){
 		mod.deps = d;
 		mod.factory = f;
-		mod.on(SAVED);
+		mod.on(LOADED);
 	}else{
 		log("Can't find module:"+i,"error");
 	}
@@ -705,7 +701,7 @@ function defines(list){
 		
 		m.pkg = 1;//标记为打包模块
 		
-		m.on(SAVED);//只保存不编译，以后根据需要编译包内对应模块
+		m.on(LOADED);//只保存不编译，以后根据需要编译包内对应模块
 
 	});
 

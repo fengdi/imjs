@@ -1449,7 +1449,9 @@ function checkPollution() {
 		old = config.pollution;
 
 	saveGlobal();
-
+	
+  //对比前后window的所有属性名console.log(config.pollution, old );
+  
 	newGlobals = diff( config.pollution, old );
 	if ( newGlobals.length > 0 ) {
 		QUnit.pushFailure( "Introduced global variable(s): " + newGlobals.join(", ") );

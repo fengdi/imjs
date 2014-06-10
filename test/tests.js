@@ -1,3 +1,4 @@
+//1
 require("test/d",function(d){
 
   test( "module d", function() {
@@ -6,7 +7,7 @@ require("test/d",function(d){
 
 });
 
-
+//2
 require("test/a",function(a){
 
   test( "module a", function() {
@@ -15,6 +16,7 @@ require("test/a",function(a){
   
 });
 
+//3
 //再次请求
 require("test/a",function(a){
 
@@ -24,6 +26,7 @@ require("test/a",function(a){
 
 });
 
+//4
 require(["test/a", "test/b", "test/c", "test/d"],function(a, b, c, d){
 
   test( "module a,b,c,d", function() {
@@ -35,7 +38,7 @@ require(["test/a", "test/b", "test/c", "test/d"],function(a, b, c, d){
 
 });
 
-
+//5
 //循环依赖检测
 require("test/cycle/a",function(a){
   throw new Error("cycle");
@@ -50,6 +53,7 @@ require("test/cycle/a",function(a){
 
 });
 
+//6
 require("test/string",function(a){
   
   test( "module string", function() {
@@ -57,6 +61,8 @@ require("test/string",function(a){
   });
 
 });
+
+//7
 require("test/number",function(a){
   
   test( "module number", function() {
@@ -65,6 +71,7 @@ require("test/number",function(a){
 
 });
 
+//8
 require("test/object",function(a){
   
   test( "module object", function() {
@@ -73,6 +80,7 @@ require("test/object",function(a){
 
 });
 
+//9
 require("modules/jquery",function(a){
   test( "module jquery", function() {
     ok( typeof a != 'undefined', "Passed!" );
@@ -80,6 +88,7 @@ require("modules/jquery",function(a){
 
 });
 
+//10
 require("test/repeat/a",function(a){
   test( "module repeat", function() {
     ok( a == 'this is Rthis is R', "Passed!" );
@@ -87,7 +96,17 @@ require("test/repeat/a",function(a){
 
 });
 
+//11
+require("test/not-amd",function(){
+  
+  test( "not-amd module", function() {
+    ok( noAMD == true, "Passed!" );
+    ok( show() == "NotAMD", "Passed!" );
+  });
 
+});
+
+//12
 require("test/merge/a",function(a){
   
   test( "module merge", function() {
@@ -96,7 +115,7 @@ require("test/merge/a",function(a){
 
 });
 
-
+//13
 require("test/404",function(f){
   //请求错误链接
 
