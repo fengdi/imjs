@@ -17,6 +17,7 @@
 var ud = void 0;
 var doc = document;
 var epa = [];
+var uid = 0;
 var slice = epa.slice;
 var noop = function(){};
 var rePtl = /^(\w+:\/\/\/?)(.*)/;
@@ -127,7 +128,20 @@ var path = {
 	//检测是否为带协议的绝对路径 http://a.com
 	isAP:function(path){
 		return !!path.match(rePtl);
-	}
+	},
+    getPath:function(scriptPath){
+        if(!path.isAP(scriptPath)){
+            var docPath = (location.href+"").replace(/(\?|#).*$/i,"");// 页面路径
+
+            if(scriptPath.match(/^\/|\\/g)){
+                docPath = path.hostRoot(docPath);
+            }else{
+                docPath = path.dirname(docPath.match(/\/|\\$/g) ? docPath+"i" : docPath);
+            }
+            scriptPath = docPath+"/"+scriptPath;
+        }
+        return scriptPath;
+    }
 };
 
 
@@ -139,43 +153,29 @@ var getInteractiveScriptPath = function (){
     if(doc.currentScript){
         return doc.currentScript.src;
     }else{
-        //ie6-10 得到当前正在执行的script标签
+        //IE6-10 得到当前正在执行的script标签
         var scripts = doc.scripts || doc.getElementsByTagName('script');
         for (var i = scripts.length - 1; i > -1; i--) {
-            if (reState.test(scripts[i].readyState)){
+            if (/interactive/.test(scripts[i].readyState)){
                 return scripts[i].src;
             }
         }
-// 移除对老版本支持
-//        // chrome and firefox4以前的版本
-//        var stack;// = (new Error()).stack;
-//        try{
-//        	arguments.length(); //强制报错,以便捕获e.stack
-//        }catch(e){
-//          stack = e.stack || 
-//          (global.opera && ((e+"").match(/of linked script \S+/g) || []).join(" "));
-//        }
-//        stack = stack.split(/[@ ]/g).pop();//取得最后一行,最后一个空格或@之后的部分
-//        return stack.replace(/(:\d+)?:\d+(\s)?$/i, "");//去掉行号与或许存在的出错字符起始位置
+        // IE11 和 chrome and firefox4以前的版本 
+        var stack;
+        try{
+        	arguments.length(); //强制报错,以便捕获e.stack
+		}catch(e){
+			stack = e.stack || 
+			(global.opera && ((e+"").match(/of linked script \S+/g) || []).join(" "));
+        }
+        stack = stack.split(/[@ ]/g).pop();//取得最后一行,最后一个空格或@之后的部分
+        stack = stack.replace(/^\(/,"").replace(/\)$/,"");// IE11 (http://a.c/a.js:1:2) => http://a.c/a.js:1:2
+		return stack.replace(/(:\d+)?:\d+(\s)?$/i, "");//去掉行号与或许存在的出错字符起始位置
     }
     return currentlyAddingScript && currentlyAddingScript.src;
 };
 
-var imPath = (function(){
-	var imPath = getInteractiveScriptPath();// im.js路径
-
-	if(!path.isAP(imPath)){
-		var docPath = (location.href+"").replace(/(\?|#).*$/i,"");// 页面路径
-
-		if(imPath.match(/^\/|\\/g)){
-			docPath = path.hostRoot(docPath);
-		}else{
-			docPath = path.dirname(docPath.match(/\/|\\$/g) ? docPath+"i" : docPath);
-		}
-		imPath = docPath+"/"+imPath;
-	}
-	return imPath;
-})();
+var imPath = path.getPath(getInteractiveScriptPath());// im.js路径
 
 var config = {
 	path:imPath,
@@ -242,6 +242,7 @@ mix(Module.prototype,{
 	load:function() {
 		//通过script 加载模块
 		var that = this;
+        var waitId = uid;
 		var onerror = function(e){
 			//log("Imjs: load file "+that.file+" error! ","error");
 			moduleManager.remove(that.file);
@@ -252,12 +253,34 @@ mix(Module.prototype,{
 	    script.async = "async";
 	    script.src = that.file;
 	    script.onerror = onerror;
+        
+        //A:before doSomething
+        
+        //顺序为 A => 执行文件js => B
+        
 	    script.onload = script.onreadystatechange = function () {
+            
 	        if (reState.test(script.readyState)) {
 	        	that.on(LOADED);
 	            script && (script.onerror = script.onload = script.onreadystatechange = null);
 	            head && script && script.parentNode && head.removeChild(script);
 	            script = ud;
+                
+                
+                //B:after doSomething
+                
+                //加载非AMD模块时，uid未变化所以仍然等于之前waitId
+                if(uid === waitId){
+                    uid++;
+                    var mod = moduleManager.get(that.file);
+                    if(mod){
+                        mod.deps = [];
+                        mod.factory = function(){};
+                        mod.on(SAVED);
+                    }
+                }
+                
+                
 	        }
 	    };
 	    currentlyAddingScript = script;
@@ -449,8 +472,11 @@ var moduleManager = {
  * @remark
  */
 function define(deps, factory){
+    
+    uid++;
+    
 	var args = arguments
-	,i = getInteractiveScriptPath()
+	,i = path.getPath(getInteractiveScriptPath())
 	,d = []
 	,f = noop;
 

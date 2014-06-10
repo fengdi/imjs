@@ -5,7 +5,7 @@
 
 `im.js` is a simple solution to modular javascript development.
 
-Only 2.3 KB gzipped (4.3 KB minified)
+Only 2.3 KB gzipped (4.4 KB minified)
 
 ### Features
  * 符合AMD的匿名模块规范,不需声明别名

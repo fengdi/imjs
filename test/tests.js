@@ -101,6 +101,7 @@ require("test/404",function(f){
   //请求错误链接
 
   test( "404 ", function() {
+  
      throw new Error("404");
      throws(
       function() {
@@ -108,6 +109,9 @@ require("test/404",function(f){
       },
       "404 be run！"
     );
+    
   });
+  
+  
 });
 
