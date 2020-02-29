@@ -1,0 +1,13 @@
+{
+    "presets": [
+        "minify",
+        ["@babel/preset-env", {
+            // https://www.babeljs.cn/docs/babel-preset-env#targets
+            "targets": {
+              "chrome": "80"
+            }
+          }]
+    ],
+    //去掉注释
+    "comments": false
+}

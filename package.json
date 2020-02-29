@@ -1,0 +1,21 @@
+{
+  "name": "im.js",
+	"version": "2.0.0",
+	"description": "A tiny javascript module loader",
+  "source": "im.js",
+  "main": "dist/im.min.js",
+  "module": "dist/im.module.js",
+  "unpkg": "dist/im.umd.js",
+  "scripts": {
+    "build": "microbundle",
+    "dev": "microbundle watch",
+    "min": "node_modules/.bin/babel im.js -s -o dist/im.min.js"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.0.0",
+    "@babel/core": "^7.6.2",
+    "@babel/preset-env": "^7.6.2",
+    "babel-preset-minify": "^0.5.1",
+    "microbundle": "^0.11.0"
+  }
+}
