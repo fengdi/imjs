@@ -1,7 +1,9 @@
 
 # ![Imjs](http://img03.taobaocdn.com/imgextra/i3/583325539/TB2cJmTXFXXXXbsXpXXXXXXXXXX-583325539.png)  v2.0
 
-## A tiny javascript module loader
+## A tiny Promise based javascript module loader
+
+
 
 `im.js` is a tiny solution to modular javascript development.
 
