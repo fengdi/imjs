@@ -42,7 +42,7 @@
   };
   const dirname = path => {
     if (!path.match(/\//)) {
-      return (path = "./");
+      return "./";
     }
     return path.replace(rfile, "");
   };
@@ -66,22 +66,22 @@
   const modules = {
     // 'a' : {id:'a', deps:[], factory:(function(){}), dirname, filename, export:null}
   };
-  const define = function(id, deps, factory) {
-    const args = arguments;
+  
+  const define = ( ...args ) => {
+    const [id, deps, factory] = args;
     let i, d, f;
     const curScript = currentScript();
-    const imId = curScript && curScript.$imId;
+    const moduleId = curScript && curScript.$moduleId;
     if (args.length == 1) {
-      [i, d, f] = [imId, [], id];
+      [i, d, f] = [moduleId, [], id];
     } else if (args.length == 2) {
-      [i, d, f] = [imId, id, deps];
+      [i, d, f] = [moduleId, id, deps];
     } else if (args.length == 3) {
       [i, d, f] = [id, deps, factory];
     } else {
       throw new Error("Arguments error.");
     }
-
-    modules[i] = {
+    return modules[i] = {
       id: i,
       deps: d,
       factory: f,
@@ -90,13 +90,13 @@
       time: new Date().getTime()
     };
   };
-  const loadScript = function(url) {
+  const loadScript = url => {
     return new Promise((resolve, reject) => {
       const script = doc.createElement("script");
       script.addEventListener(
         "load",
         e => {
-          resolve(modules[url]) 
+          resolve(modules[url])
         },
         { once: true }
       );
@@ -107,19 +107,29 @@
         },
         { once: true }
       );
-      script.$imId = url;
+      script.$moduleId = url;
       script.src = url + (require.tag ? "?" + require.tag : "");
       head.insertBefore(script, head.firstChild);
     });
   };
+  const hooks = {};
+  const setHook = (id, factory) =>{
+    return hooks[realpath(id)] = factory;
+  }
+  const getHook = id => {
+    const url = realpath(id);
+    return hooks[url] && define(id, [], hooks[url])
+  }
   const require = async function(id, callback) {
-    id = realpath(id);
+
+    const url = realpath(id);
     
-    const module = modules[id] || (await loadScript(id));
+    const module = modules[url] || await loadScript(url) || getHook(id);
 
-    if (!module) throw new Error(`${id} is not AMD Module.`);
-
+    if (!module) throw new Error(`The module ${id} is not defined. You can define AMD module or use hook.`);
+    
     const { deps = [], factory, dirname, filename } = module;
+
     if (!("export" in module)) {
       module.export = await factory.apply(
         { dirname, filename },
@@ -148,6 +158,8 @@
 
   require.main = "";
 
+  require.setHook = setHook;
+  
   const curScript = currentScript();
   if (curScript) {
     try {
