@@ -1,20 +1,20 @@
 # ![Imjs](http://img03.taobaocdn.com/imgextra/i3/583325539/TB2cJmTXFXXXXbsXpXXXXXXXXXX-583325539.png) v2.0
 
-## A tiny Promise based javascript module loader
+ A tiny Promise based javascript module loader.
 
-### Features ##
+## 特点 #
 
 非常轻量级，minify 文件大小 2.3KB，gzip 传输大小 1.3KB
 
 支持 AMD 模块，并且 require 的 API 已 Promise 化
 
 
-### How to use ###
+## 使用 ##
 
 定义模块一个 AMD 规范的模块 hello.js:
 
 ```javascript
-define([], function() {
+define([], () => {
     //在模块内实现一些功能（函数、类、甚至库等）, 最后返回
     return "hello world";
 });
@@ -23,7 +23,7 @@ define([], function() {
 你可以像 [requirejs](https://requirejs.org/) 一样调用 hello.js 模块：
 
 ```javascript
-require("hello", function(hello) {
+require("hello", hello => {
     //hello模块的返回值会当参数传入
 
     alert(hello); //调用模块返回的值
@@ -38,16 +38,23 @@ require("hello", function(hello) {
     alert(hello);
 })();
 ```
+如果支持顶层await提案[top-level await](https://github.com/tc39/proposal-top-level-await) 可以直接使用：
+```javascript
+let hello = await require("hello");
+alert(hello);
+```
+  
 
 你可以在定义的 AMD 模块中使用 require
 
 ```javascript
-define(async function() {
+define(async () => {
     let hello = await require("hello");
     //let a = await require("a");
     //let b = await require("b");
+    
     //多个依赖模块
-    //let deps = await Promise.all([
+    //let [ hello, a, b ] = await Promise.all([
     //  require('hello'), require('a'), require('b')  //...
     //]);
     return hello.toUpperCase();
@@ -66,21 +73,21 @@ require.setHook("./lib/jquery", () => {
 });
 
 //再调用模块
-require("./lib/jquery", function($) {
+require("./lib/jquery", $ => {
     $("#id").css({ color: red });
 });
 ```
 
-### 配置项 ###
+## 配置项 ##
 
 `cwd` 工作目录
 
 ```javascript
 //当前工作目录
 require.cwd = "./assets/js";
-//一旦配置了cwd
-//你可以用@代替工作路径
-define(["@/a.js"], function(a) {
+
+//一旦配置了cwd，你可以用@代替工作路径
+define(["@/a.js"], a => {
     //a 来自 ./assets/js/a.js
 });
 ```
@@ -92,8 +99,8 @@ define(["@/a.js"], function(a) {
 require.default = "index.js";
 
 //定位到目录
-define(["assets/lib/"], function(lib) {
-    //lib 来自 ./assets/js/index.js
+define(["assets/lib/"], lib => {
+    //lib 来自 ./assets/lib/index.js
 });
 ```
 
@@ -103,7 +110,7 @@ define(["assets/lib/"], function(lib) {
 //模块路径统一加入tag标签
 require.tag = "v=1.0.1";
 
-define(["assets/test"], function(test) {
+define(["assets/test"], test => {
     //test 请求路径为 assets/test.js?v=1.0.1
 });
 ```
@@ -125,3 +132,9 @@ define(["assets/test"], function(test) {
     require('app.js');
  -->
 ```
+
+## 生态 ##
+ - 使用[unpkg](https://unpkg.com/)
+ - 与[Preact](https://preactjs.com/)配合的H5架子 [game-spore-preact](https://gitee.com/SporeTeam/game-spore-preact)
+ - 与react配合？
+ - 与vue配合？
